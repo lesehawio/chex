@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جزوه لغات پایه – VisionOS Edition</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600&display=swap');
+
+/* ---------------------- */
+/*   رنگ‌ها و متغیرها     */
+/* ---------------------- */
+:root {
+    --accent:#91C200;
+    --accent-soft:rgba(145,194,0,0.18);
+
+    --bg:#0d0f12;
+    --glass:rgba(255,255,255,0.06);
+    --text:#f1f5f9;
+    --sub:#9ca3af;
+    --border:rgba(255,255,255,0.12);
+}
+
+/* حالت روشن */
+.light {
+    --bg:#f5f7fa;
+    --glass:rgba(255,255,255,0.55);
+    --text:#1e293b;
+    --sub:#475569;
+    --border:rgba(0,0,0,0.12);
+}
+
+/* ---------------------- */
+/*        پایه‌ها         */
+/* ---------------------- */
+body {
+    margin:0;
+    padding:0;
+    background:var(--bg);
+    font-family:"Vazirmatn",sans-serif;
+    color:var(--text);
+    display:flex;
+    justify-content:center;
+    padding:40px 12px;
+    transition:0.35s ease;
+}
+
+/* ---------------------- */
+/*   کارت اصلی VisionOS   */
+/* ---------------------- */
+.sheet {
+    width:100%;
+    max-width:850px;
+    background:var(--glass);
+    padding:40px;
+    border-radius:32px;
+    border:1px solid var(--border);
+    backdrop-filter:blur(40px) saturate(180%);
+    box-shadow:
+        0 30px 80px rgba(0,0,0,0.45),
+        inset 0 0 40px rgba(255,255,255,0.05);
+    transition:0.35s ease;
+}
+
+/* ---------------------- */
+/*        هدر             */
+/* ---------------------- */
+.header {
+    display:flex;
+    justify-content:flex-end;
+    margin-bottom:24px;
+}
+
+.theme-toggle {
+    font-size:1.9rem;
+    cursor:pointer;
+    user-select:none;
+    padding:6px 12px;
+    border-radius:14px;
+    background:rgba(255,255,255,0.08);
+    transition:0.25s ease;
+}
+
+.theme-toggle:hover {
+    background:rgba(255,255,255,0.18);
+}
+
+/* ---------------------- */
+/*        عنوان‌ها        */
+/* ---------------------- */
+.title {
+    font-size:2rem;
+    font-weight:700;
+    text-align:center;
+    margin-bottom:8px;
+    letter-spacing:-0.5px;
+}
+
+.subtitle {
+    text-align:center;
+    color:var(--sub);
+    margin-bottom:30px;
+    font-size:1rem;
+}
+
+/* ---------------------- */
+/*   دسته‌بندی‌ها         */
+/* ---------------------- */
+.category {
+    margin-top:40px;
+    margin-bottom:20px;
+    font-size:1.4rem;
+    font-weight:700;
+    color:var(--accent);
+    border-bottom:1px solid var(--border);
+    padding-bottom:8px;
+}
+
+/* ---------------------- */
+/*   کارت لغت             */
+/* ---------------------- */
+.word-card {
+    background:rgba(255,255,255,0.05);
+    border:1px solid var(--border);
+    padding:22px 26px;
+    border-radius:20px;
+    margin-bottom:16px;
+    transition:0.25s ease;
+    backdrop-filter:blur(20px);
+}
+
+.word-card:hover {
+    border-color:var(--accent);
+    background:rgba(145,194,0,0.08);
+    transform:translateY(-2px);
+}
+
+.word {
+    font-size:1.5rem;
+    font-weight:700;
+    margin-bottom:4px;
+}
+
+.fa {
+    color:var(--sub);
+    font-size:1.05rem;
+    margin-bottom:4px;
+}
+
+.pr {
+    font-size:1rem;
+    color:var(--accent);
+    margin-bottom:10px;
+}
+
+.type {
+    font-size:0.9rem;
+    color:var(--sub);
+    margin-bottom:10px;
+}
+
+.desc {
+    font-size:0.95rem;
+    line-height:1.7;
+    margin-bottom:12px;
+}
+
+.example {
+    margin-top:10px;
+    background:rgba(255,255,255,0.08);
+    padding:12px 14px;
+    border-radius:14px;
+    font-size:0.95rem;
+    line-height:1.7;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sheet">
+
+    <div class="header">
+        <div id="themeToggle" class="theme-toggle">🌙</div>
+    </div>
+
+    <div class="title">جزوه لغات روز یکم</div>
+    <div class="subtitle">۳۴ لغت ضروری – همراه با معنی، تلفظ، توضیح و مثال</div>
+
+    <div id="content"></div>
+
+</div>
+
+<script>
+/* داده‌ها */
+const words = [
+{w:"i", fa:"من",pr:"آی", type:"ضمیر", desc:"برای اشاره به خود در جایگاه فاعلی. "}, 
+{w:"you", fa:"تو", pr:"یو", type:"ضمیر", desc:"برای خطاب قرار دادن یک نفر یا چند نفر."},
+{w:"he", fa:"او (مذکر)", pr:"هی", type:"ضمیر", desc:"برای اشاره به یک مرد یا پسر."},
+{w:"she", fa:"او (مونث)", pr:"شی", type:"ضمیر", desc:"برای اشاره به یک زن یا دختر."},
+{w:"it", fa:"آن / چیز", pr:"ایت", type:"ضمیر", desc:"برای اشیا، حیوانات یا چیزهای بی‌جان."},
+{w:"we", fa:"ما", pr:"وی", type:"ضمیر", desc:"برای اشاره به خود و دیگران."},
+{w:"they", fa:"آنها", pr:"دِی", type:"ضمیر", desc:"برای اشاره به چند نفر یا چند چیز."},
+
+{w:"be", fa:"بودن", pr:"بی", type:"فعل", desc:"مهم‌ترین فعل انگلیسی؛ برای توصیف حالت و هویت."},
+{w:"have", fa:"داشتن", pr:"هَو", type:"فعل", desc:"برای مالکیت یا بیان ویژگی."},
+{w:"do", fa:"انجام دادن", pr:"دو", type:"فعل", desc:"برای انجام کار یا ساخت سوال."},
+{w:"go", fa:"رفتن", pr:"گو", type:"فعل", desc:"برای حرکت از جایی به جای دیگر."},
+{w:"come", fa:"آمدن", pr:"کام", type:"فعل", desc:"برای حرکت به سمت گوینده."},
+{w:"make", fa:"ساختن", pr:"مِیک", type:"فعل", desc:"برای ساختن یا ایجاد کردن."},
+{w:"get", fa:"گرفتن", pr:"گِت", type:"فعل", desc:"برای دریافت یا رسیدن به چیزی."},
+{w:"give", fa:"دادن", pr:"گیو", type:"فعل", desc:"برای انتقال چیزی."},
+{w:"take", fa:"برداشتن", pr:"تَیک", type:"فعل", desc:"برای گرفتن یا برداشتن."},
+{w:"want", fa:"خواستن", pr:"وانت", type:"فعل", desc:"برای بیان خواسته."},
+{w:"need", fa:"نیاز داشتن", pr:"نید", type:"فعل", desc:"برای بیان نیاز ضروری."},
+{w:"like", fa:"دوست داشتن", pr:"لایک", type:"فعل", desc:"برای بیان علاقه."},
+{w:"know", fa:"دانستن", pr:"نو", type:"فعل", desc:"برای بیان آگاهی."},
+{w:"think", fa:"فکر کردن", pr:"تینک", type:"فعل", desc:"برای بیان نظر."},
+{w:"work", fa:"کار کردن", pr:"وورک", type:"فعل", desc:"برای انجام کار."},
+{w:"live", fa:"زندگی کردن", pr:"لیو", type:"فعل", desc:"برای بیان محل زندگی."},
+
+{w:"yes", fa:"بله", pr:"یِس", type:"قید", desc:"برای تایید."},
+{w:"no", fa:"نه", pr:"نو", type:"قید", desc:"برای رد کردن."},
+{w:"not", fa:"نه / نیست", pr:"نات", type:"قید", desc:"برای منفی کردن جمله."},
+
+{w:"very", fa:"خیلی", pr:"وِری", type:"قید", desc:"برای تاکید روی صفت."},
+{w:"really", fa:"واقعاً", pr:"ریلی", type:"قید", desc:"تاکید قوی‌تر از very."},
+{w:"also", fa:"همچنین", pr:"اُلسو", type:"قید", desc:"برای اضافه کردن اطلاعات."},
+
+{w:"because", fa:"زیرا", pr:"بیکاز", type:"حرف ربط", desc:"برای بیان دلیل."},
+{w:"if", fa:"اگر", pr:"اِف", type:"حرف ربط", desc:"برای بیان شرط."},
+{w:"but", fa:"اما", pr:"بات", type:"حرف ربط", desc:"برای تضاد."},
+{w:"and", fa:"و", pr:"اَند", type:"حرف ربط", desc:"برای وصل کردن دو چیز."},
+{w:"or", fa:"یا", pr:"اُر", type:"حرف ربط", desc:"برای انتخاب."}
+];
+
+/* مثال‌ساز */
+function example(w){
+    const ex = {
+        i: "I like myself .— من خودم را دوست دار",  
+        you:"I see you. — من تو را می‌بینم.",
+        he:"He is here. — او اینجاست.",
+        she:"She is happy. — او خوشحال است.",
+        it:"It is cold. — هوا سرد است.",
+        we:"We are friends. — ما دوست هستیم.",
+        they:"They are ready. — آنها آماده‌اند.",
+        be:"I want to be better. — می‌خواهم بهتر باشم.",
+        have:"I have a car. — من ماشین دارم.",
+        do:"I do my work. — من کارم را انجام می‌دهم.",
+        go:"I go home. — من به خانه می‌روم.",
+        come:"Come here. — بیا اینجا.",
+        make:"I make food. — من غذا درست می‌کنم.",
+        get:"I get it. — فهمیدم.",
+        give:"Give me that. — آن را به من بده.",
+        take:"Take it. — بگیرش.",
+        want:"I want water. — من آب می‌خواهم.",
+        need:"I need help. — من کمک نیاز دارم.",
+        like:"I like you. — من تو را دوست دارم.",
+        know:"I know this. — من این را می‌دانم.",
+        think:"I think so. — فکر می‌کنم همینطور باشد.",
+        work:"I work today. — امروز کار می‌کنم.",
+        live:"I live here. — من اینجا زندگی می‌کنم.",
+        yes:"Yes, I agree. — بله، موافقم.",
+        no:"No, thanks. — نه، ممنون.",
+        not:"I am not ready. — من آماده نیستم.",
+        very:"Very good. — خیلی خوب.",
+        really:"I really like it. — واقعاً دوستش دارم.",
+        also:"I also know him. — من همچنین او را می‌شناسم.",
+        because:"I am here because of you. — من به خاطر تو اینجا هستم.",
+        if:"If you want. — اگر تو بخواهی.",
+        but:"I like it, but not now. — دوست دارم، اما نه الان.",
+        and:"You and me. — من و تو.",
+        or:"Tea or coffee? — چای یا قهوه؟"
+    };
+    return ex[w];
+}
+
+/* دسته‌بندی */
+const categories = {
+    "ضمیرها": words.filter(x=>x.type==="ضمیر"),
+    "افعال پایه": words.filter(x=>x.type==="فعل").slice(0,6),
+    "افعال کاربردی": words.filter(x=>x.type==="فعل").slice(6),
+    "قیدها": words.filter(x=>x.type==="قید"),
+    "حروف ربط": words.filter(x=>x.type==="حرف ربط")
+};
+
+/* نمایش */
+const content = document.getElementById("content");
+
+content.innerHTML = Object.keys(categories).map(cat => `
+    <div class="category">${cat}</div>
+    ${categories[cat].map(x => `
+        <div class="word-card">
+            <div class="word">${x.w}</div>
+            <div class="fa">${x.fa}</div>
+            <div class="pr">تلفظ: ${x.pr}</div>
+            <div class="type">نقش دستوری: ${x.type}</div>
+            <div class="desc">${x.desc}</div>
+            <div class="example">${example(x.w)}</div>
+        </div>
+    `).join("")}
+`).join("");
+
+/* تم روشن/تیره */
+document.getElementById("themeToggle").onclick = ()=>{
+    document.body.classList.toggle("light");
+    themeToggle.textContent =
+        document.body.classList.contains("light") ? "☀" : "🌙";
+};
+</script>
+
+</body>
+</html>
