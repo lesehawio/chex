@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Apple VisionOS Flashcard</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600&display=swap');
+
+/* رنگ‌ها و تم پایه */
+:root {
+  --accent:#91C200;
+  --bg-dark:#05060a;
+  --bg-light:#f3f4f6;
+  --text-dark:#f9fafb;
+  --text-light:#111827;
+  --sub-dark:#9ca3af;
+  --sub-light:#6b7280;
+  --glass-dark:rgba(255,255,255,0.06);
+  --glass-light:rgba(255,255,255,0.85);
+  --border:#91C200;
+}
+
+/* حالت‌ها */
+body {
+  margin:0;
+  padding:0;
+  font-family:"Vazirmatn",sans-serif;
+  background:var(--bg-dark);
+  color:var(--text-dark);
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:background 0.35s ease,color 0.35s ease;
+}
+
+/* تم روشن/تیره بدون جابه‌جایی */
+body.light {
+  background:var(--bg-light);
+  color:var(--text-light);
+}
+
+/* هدر ثابت */
+.header {
+  position:fixed;
+  top:18px;
+  right:18px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  z-index:10;
+}
+
+.theme-toggle {
+  font-size:1.6rem;
+  cursor:pointer;
+  padding:6px 12px;
+  border-radius:14px;
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(20px);
+  transition:0.25s ease;
+}
+.theme-toggle:hover {
+  background:rgba(255,255,255,0.18);
+}
+
+.counter {
+  font-size:0.9rem;
+  color:var(--sub-dark);
+}
+body.light .counter {
+  color:var(--sub-light);
+}
+
+/* کانتینر مرکزی ثابت */
+.wrapper {
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.card-shell {
+  width:420px;
+  max-width:90vw;
+  height:340px;
+}
+
+/* کارت شیشه‌ای VisionOS با حاشیه 91C200 */
+.card {
+  width:100%;
+  height:100%;
+  background:var(--glass-dark);
+  border-radius:26px;
+  border:2px solid var(--border);
+  backdrop-filter:blur(40px) saturate(180%);
+  box-shadow:
+    0 30px 80px rgba(0,0,0,0.55),
+    inset 0 0 40px rgba(255,255,255,0.06);
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:22px 24px;
+  box-sizing:border-box;
+  text-align:right;
+  transition:transform 0.25s ease, background 0.35s ease;
+}
+body.light .card {
+  background:var(--glass-light);
+}
+
+/* بالای کارت */
+.card-header {
+  font-size:0.85rem;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  color:var(--sub-dark);
+}
+body.light .card-header {
+  color:var(--sub-light);
+}
+
+/* محتوا */
+.chunk {
+  font-size:1.5rem;
+  font-weight:700;
+  margin-top:8px;
+  margin-bottom:4px;
+}
+
+.meaning {
+  font-size:1.05rem;
+  color:var(--accent);
+  margin-bottom:10px;
+}
+
+.desc {
+  font-size:0.95rem;
+  color:var(--sub-dark);
+  margin-bottom:10px;
+  line-height:1.7;
+}
+body.light .desc {
+  color:var(--sub-light);
+}
+
+.usage {
+  margin-top:6px;
+  background:rgba(255,255,255,0.08);
+  border-radius:14px;
+  padding:10px 12px;
+  font-size:0.9rem;
+  line-height:1.7;
+}
+body.light .usage {
+  background:rgba(255,255,255,0.9);
+}
+
+/* نوار پیشرفت */
+.progress-bar {
+  width:100%;
+  height:6px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.08);
+  overflow:hidden;
+  margin-top:10px;
+}
+.progress-fill {
+  height:100%;
+  width:0%;
+  background:var(--accent);
+  transition:width 0.25s ease;
+}
+
+/* درگ فقط برای جابه‌جایی کارت، نه جابه‌جایی جای کارت روی صفحه */
+.card.dragging {
+  transition:none;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span id="counter" class="counter"></span>
+  <div id="themeToggle" class="theme-toggle">🌙</div>
+</div>
+
+<div class="wrapper">
+  <div class="card-shell">
+    <div id="card" class="card">
+      <div>
+        <div class="card-header">
+          <span>Chunk Flashcard</span>
+          <span id="indexLabel"></span>
+        </div>
+        <div class="chunk" id="chunk"></div>
+        <div class="meaning" id="meaning"></div>
+        <div class="desc" id="desc"></div>
+        <div class="usage" id="usage"></div>
+      </div>
+      <div class="progress-bar">
+        <div id="progress" class="progress-fill"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const chunks = [
+  {en:"make a decision", fa:"تصمیم گرفتن", 
+   desc:"وقتی می‌خواهی بین چند گزینه یکی را انتخاب کنی از این چانک استفاده می‌شود.",
+   usage:"I need to make a decision about my future.\nباید دربارهٔ آینده‌ام تصمیم بگیرم."},
+  {en:"take notes", fa:"یادداشت برداشتن",
+   desc:"برای نوشتن نکات مهم در کلاس، جلسه یا هنگام مطالعه.",
+   usage:"Please take notes during the lecture.\nلطفاً هنگام سخنرانی یادداشت بردار."},
+  {en:"attend class", fa:"در کلاس حاضر شدن",
+   desc:"یعنی در کلاس حضور فیزیکی یا آنلاین داشتن.",
+   usage:"I attend class every morning.\nمن هر صبح در کلاس حاضر می‌شوم."},
+  {en:"submit an assignment", fa:"تحویل تکلیف دادن",
+   desc:"برای زمانی که تکلیف را به معلم یا سیستم آموزشی تحویل می‌دهی.",
+   usage:"You must submit the assignment by Friday.\nباید تا جمعه تکلیف را تحویل بدهی."},
+  {en:"pass an exam", fa:"قبول شدن در امتحان",
+   desc:"یعنی نمرهٔ کافی برای قبولی گرفتن.",
+   usage:"She passed the exam with a good grade.\nاو با نمرهٔ خوب در امتحان قبول شد."},
+  {en:"fail an exam", fa:"رد شدن در امتحان",
+   desc:"وقتی نمرهٔ لازم را نمی‌گیری.",
+   usage:"He failed the exam and will try again.\nاو در امتحان رد شد و دوباره تلاش خواهد کرد."},
+  {en:"do homework", fa:"انجام تکالیف",
+   desc:"برای انجام تکالیف مدرسه یا دانشگاه.",
+   usage:"I always do my homework after dinner.\nمن همیشه بعد از شام تکالیفم را انجام می‌دهم."},
+  {en:"prepare a presentation", fa:"آماده کردن پرزنتیشن",
+   desc:"برای آماده‌سازی اسلایدها و صحبت برای ارائه.",
+   usage:"We need to prepare a presentation for tomorrow.\nباید برای فردا یک پرزنتیشن آماده کنیم."},
+  {en:"give a lecture", fa:"ارائه درس دادن",
+   desc:"وقتی معلم یا سخنران برای گروهی صحبت می‌کند.",
+   usage:"The professor will give a lecture on history.\nاستاد یک سخنرانی دربارهٔ تاریخ ارائه می‌دهد."},
+  {en:"schedule a meeting", fa:"جلسه برنامه‌ریزی کردن",
+   desc:"برای تعیین زمان و تاریخ جلسه.",
+   usage:"Let’s schedule a meeting for next week.\nبیایید برای هفتهٔ بعد جلسه‌ای برنامه‌ریزی کنیم."},
+  {en:"organize a workshop", fa:"کارگاه برگزار کردن",
+   desc:"برای برنامه‌ریزی و اجرای یک کارگاه آموزشی.",
+   usage:"They want to organize a workshop on design.\nآنها می‌خواهند کارگاهی دربارهٔ طراحی برگزار کنند."},
+  {en:"write a report", fa:"گزارش نوشتن",
+   desc:"برای نوشتن گزارش کاری، درسی یا تحقیق.",
+   usage:"I have to write a report about the project.\nباید گزارشی دربارهٔ پروژه بنویسم."},
+  {en:"read a book", fa:"کتاب خواندن",
+   desc:"برای مطالعهٔ کتاب در هر زمینه‌ای.",
+   usage:"I like to read a book before bed.\nدوست دارم قبل از خواب کتاب بخوانم."},
+  {en:"review notes", fa:"مرور یادداشت‌ها",
+   desc:"برای مرور نکاتی که قبلاً نوشته‌ای.",
+   usage:"Review your notes before the exam.\nقبل از امتحان یادداشت‌هایت را مرور کن."},
+  {en:"take a test", fa:"تست دادن",
+   desc:"برای شرکت در آزمون کوتاه یا تستی.",
+   usage:"We will take a test at the end of the lesson.\nدر پایان درس یک تست می‌دهیم."},
+  {en:"attend a seminar", fa:"در سمینار شرکت کردن",
+   desc:"برای حضور در جلسهٔ آموزشی یا علمی.",
+   usage:"She will attend a seminar on education.\nاو در سمیناری دربارهٔ آموزش شرکت خواهد کرد."},
+  {en:"complete a project", fa:"تکمیل پروژه",
+   desc:"برای تمام کردن یک پروژهٔ درسی یا کاری.",
+   usage:"We need to complete the project this week.\nباید این هفته پروژه را تکمیل کنیم."},
+  {en:"ask a question", fa:"سوال پرسیدن",
+   desc:"برای مطرح کردن سوال در کلاس یا جلسه.",
+   usage:"Don’t be afraid to ask a question.\nاز سوال پرسیدن نترس."},
+  {en:"answer a question", fa:"پاسخ دادن",
+   desc:"برای جواب دادن به سوال کسی.",
+   usage:"Can you answer this question?\nمی‌توانی به این سوال پاسخ بدهی؟"},
+  {en:"study a subject", fa:"مطالعه یک درس",
+   desc:"برای خواندن و یادگیری یک موضوع خاص.",
+   usage:"I study this subject every evening.\nمن هر عصر این درس را می‌خوانم."},
+  {en:"solve a problem", fa:"حل کردن مشکل",
+   desc:"برای پیدا کردن راه‌حل یک مسئله.",
+   usage:"We must solve this problem together.\nباید این مشکل را با هم حل کنیم."},
+  {en:"join a class", fa:"ثبت‌نام در کلاس",
+   desc:"برای پیوستن به یک کلاس جدید.",
+   usage:"I want to join a class for English.\nمی‌خواهم در یک کلاس انگلیسی ثبت‌نام کنم."},
+  {en:"enroll in a course", fa:"نام‌نویسی در دوره",
+   desc:"برای ثبت‌نام رسمی در یک دورهٔ آموزشی.",
+   usage:"She will enroll in a course next month.\nاو ماه بعد در یک دوره نام‌نویسی می‌کند."},
+  {en:"prepare for an exam", fa:"آماده شدن برای امتحان",
+   desc:"برای درس خواندن و تمرین قبل از امتحان.",
+   usage:"You should prepare for the exam early.\nباید زود برای امتحان آماده شوی."},
+  {en:"take an exam", fa:"امتحان دادن",
+   desc:"برای شرکت در امتحان رسمی.",
+   usage:"I will take an exam tomorrow.\nمن فردا امتحان می‌دهم."},
+  {en:"participate in a discussion", fa:"شرکت در بحث",
+   desc:"برای حضور فعال در گفت‌وگو و تبادل نظر.",
+   usage:"Students should participate in the discussion.\nدانش‌آموزان باید در بحث شرکت کنند."},
+  {en:"lead a team", fa:"هدایت تیم",
+   desc:"برای مدیریت و راهبری گروه.",
+   usage:"He will lead a team of designers.\nاو تیمی از طراحان را هدایت خواهد کرد."},
+  {en:"attend a lecture", fa:"حضور در سخنرانی",
+   desc:"برای شرکت در یک سخنرانی علمی یا آموزشی.",
+   usage:"We will attend a lecture on science.\nما در یک سخنرانی دربارهٔ علم شرکت می‌کنیم."},
+  {en:"present an idea", fa:"ارائه ایده",
+   desc:"برای معرفی و توضیح یک ایده به دیگران.",
+   usage:"She will present an idea to the team.\nاو ایده‌ای را به تیم ارائه خواهد داد."},
+  {en:"submit a report", fa:"تحویل گزارش",
+   desc:"برای تحویل نسخهٔ نهایی گزارش.",
+   usage:"Please submit the report by Monday.\nلطفاً گزارش را تا دوشنبه تحویل بده."},
+  {en:"gain experience", fa:"تجربه کسب کردن",
+   desc:"برای یادگیری از کار و فعالیت واقعی.",
+   usage:"You will gain experience in this job.\nدر این کار تجربه کسب خواهی کرد."},
+  {en:"learn a skill", fa:"مهارت یاد گرفتن",
+   desc:"برای یادگیری توانایی جدید.",
+   usage:"I want to learn a new skill.\nمی‌خواهم یک مهارت جدید یاد بگیرم."},
+  {en:"teach a class", fa:"تدریس کردن",
+   desc:"برای آموزش دادن به گروهی از دانش‌آموزان.",
+   usage:"She will teach a class next semester.\nاو ترم بعد یک کلاس تدریس خواهد کرد."},
+  {en:"ask for help", fa:"درخواست کمک",
+   desc:"برای زمانی که به کمک دیگران نیاز داری.",
+   usage:"Don’t be shy to ask for help.\nاز درخواست کمک خجالت نکش."},
+  {en:"take a break", fa:"استراحت کوتاه",
+   desc:"برای توقف کوتاه در کار یا مطالعه.",
+   usage:"Let’s take a break for ten minutes.\nبیایید ده دقیقه استراحت کنیم."},
+  {en:"complete a task", fa:"انجام یک کار",
+   desc:"برای تمام کردن یک کار مشخص.",
+   usage:"I need to complete this task today.\nباید امروز این کار را تمام کنم."},
+  {en:"prepare a lesson", fa:"آماده کردن درس",
+   desc:"برای آماده‌سازی مطالبی که قرار است تدریس شوند.",
+   usage:"The teacher will prepare a lesson tonight.\nمعلم امشب درس را آماده خواهد کرد."}
+];
+
+let index = 0;
+
+const cardEl    = document.getElementById("card");
+const chunkEl   = document.getElementById("chunk");
+const meaningEl = document.getElementById("meaning");
+const descEl    = document.getElementById("desc");
+const usageEl   = document.getElementById("usage");
+const counterEl = document.getElementById("counter");
+const indexLabel= document.getElementById("indexLabel");
+const progressEl= document.getElementById("progress");
+
+function renderCard(){
+  const item = chunks[index];
+  chunkEl.textContent   = item.en;
+  meaningEl.textContent = item.fa;
+  descEl.textContent    = item.desc;
+  usageEl.innerHTML     = item.usage.replace(/\n/g,"<br>");
+  counterEl.textContent = `${index+1} / ${chunks.length}`;
+  indexLabel.textContent= `Card ${index+1}`;
+  progressEl.style.width = ((index+1)/chunks.length)*100 + "%";
+  cardEl.style.transform = "translateX(0)";
+}
+renderCard();
+
+/* درگ برای کارت بعدی/قبلی، بدون جابه‌جایی جای کارت روی صفحه */
+let startX = 0;
+let dragging = false;
+
+function startDrag(e){
+  dragging = true;
+  cardEl.classList.add("dragging");
+  startX = e.touches ? e.touches[0].clientX : e.clientX;
+}
+
+function onDrag(e){
+  if(!dragging) return;
+  const x = e.touches ? e.touches[0].clientX : e.clientX;
+  const delta = x - startX;
+  cardEl.style.transform = `translateX(${delta}px)`;
+}
+
+function endDrag(e){
+  if(!dragging) return;
+  dragging = false;
+  cardEl.classList.remove("dragging");
+  const x = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+  const delta = x - startX;
+  const threshold = 80;
+
+  if(delta > threshold && index > 0){
+    index--;
+  }else if(delta < -threshold && index < chunks.length-1){
+    index++;
+  }
+  renderCard();
+}
+
+cardEl.addEventListener("mousedown", startDrag);
+window.addEventListener("mousemove", onDrag);
+window.addEventListener("mouseup", endDrag);
+
+cardEl.addEventListener("touchstart", startDrag,{passive:true});
+window.addEventListener("touchmove", onDrag,{passive:true});
+window.addEventListener("touchend", endDrag);
+
+/* تم روشن/تیره بدون تکون خوردن کارت */
+document.getElementById("themeToggle").onclick = () => {
+  document.body.classList.toggle("light");
+  themeToggle.textContent =
+    document.body.classList.contains("light") ? "☀" : "🌙";
+};
+</script>
+
+</body>
+</html>
