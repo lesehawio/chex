@@ -36,7 +36,7 @@ body {
   transition:background 0.35s ease,color 0.35s ease;
 }
 
-/* تم روشن/تیره بدون جابه‌جایی */
+/* تم روشن/تیره */
 body.light {
   background:var(--bg-light);
   color:var(--text-light);
@@ -74,7 +74,7 @@ body.light .counter {
   color:var(--sub-light);
 }
 
-/* کانتینر مرکزی ثابت */
+/* کانتینر مرکزی */
 .wrapper {
   width:100%;
   display:flex;
@@ -88,7 +88,7 @@ body.light .counter {
   height:340px;
 }
 
-/* کارت شیشه‌ای VisionOS با حاشیه 91C200 */
+/* کارت شیشه‌ای */
 .card {
   width:100%;
   height:100%;
@@ -96,9 +96,7 @@ body.light .counter {
   border-radius:26px;
   border:2px solid var(--border);
   backdrop-filter:blur(40px) saturate(180%);
-  box-shadow:
-    0 30px 80px rgba(0,0,0,0.55),
-    inset 0 0 40px rgba(255,255,255,0.06);
+  box-shadow:0 30px 80px rgba(0,0,0,0.55);
   display:flex;
   flex-direction:column;
   justify-content:space-between;
@@ -106,9 +104,14 @@ body.light .counter {
   box-sizing:border-box;
   text-align:right;
   transition:transform 0.25s ease, background 0.35s ease;
+  cursor:grab;
 }
 body.light .card {
   background:var(--glass-light);
+}
+.card.dragging {
+  cursor:grabbing;
+  transition:none;
 }
 
 /* بالای کارت */
@@ -174,11 +177,6 @@ body.light .usage {
   background:var(--accent);
   transition:width 0.25s ease;
 }
-
-/* درگ فقط برای جابه‌جایی کارت، نه جابه‌جایی جای کارت روی صفحه */
-.card.dragging {
-  transition:none;
-}
 </style>
 </head>
 <body>
@@ -209,409 +207,165 @@ body.light .usage {
 </div>
 
 <script>
+// داده‌ها با ساختار یکسان
 const chunks = [
-., [2/25/2026 12:30 AM]
-const data = {
-  pairs: [
-{
-noun: {w: "appointment", fa: "قرار ملاقات", pr: "اپوینتمنت"},
-verb: {w: "schedule", fa: "تنظیم کردن", pr: "سکجول"},
-chunk: "schedule an appointment",
-chunkFa: "تنظیم قرار ملاقات"
-},
-
-{
-noun: {w: "attendance", fa: "حضور و غیاب", pr: "اتندنس"},
-verb: {w: "take", fa: "گرفتن", pr: "تِیک"},
-chunk: "take attendance",
-chunkFa: "حضور و غیاب گرفتن"
-},
-
-{
-noun: {w: "feedback", fa: "بازخورد", pr: "فیدبک"},
-verb: {w: "give", fa: "دادن", pr: "گیو"},
-chunk: "give feedback",
-chunkFa: "بازخورد دادن"
-},
-
-{
-noun: {w: "meeting", fa: "جلسه", pr: "میتینگ"},
-verb: {w: "attend", fa: "شرکت کردن", pr: "اتند"},
-chunk: "attend a meeting",
-chunkFa: "در جلسه شرکت کردن"
-},
-
-{
-noun: {w: "task", fa: "وظیفه", pr: "تسک"},
-verb: {w: "assign", fa: "واگذار کردن", pr: "اساین"},
-chunk: "assign a task",
-chunkFa: "واگذاری کار"
-},
-
-{
-noun: {w: "mistakes", fa: "اشتباهات", pr: "میستیکس"},
-verb: {w: "fix", fa: "درست کردن", pr: "فیکس"},
-chunk: "fix mistakes",
-chunkFa: "اصلاح اشتباهات"
-},
-
-{
-noun: {w: "proposal", fa: "پیشنهاد", pr: "پروپوزال"},
-verb: {w: "submit", fa: "ارسال کردن", pr: "سابمیت"},
-chunk: "submit a proposal",
-chunkFa: "ارسال پیشنهاد"
-},
-
-{
-noun: {w: "research", fa: "تحقیق", pr: "ریسرچ"},
-verb: {w: "do", fa: "انجام دادن", pr: "دو"},
-chunk: "do research",
-chunkFa: "تحقیق کردن"
-},
-
-{
-noun: {w: "data", fa: "داده", pr: "دیتا"},
-verb: {w: "analyze", fa: "تحلیل کردن", pr: "انالایز"},
-chunk: "analyze data",
-chunkFa: "تحلیل داده"
-},
-
-{
-noun: {w: "essay", fa: "مقاله", pr: "اسِی"},
-verb: {w: "write", fa: "نوشتن", pr: "رایت"},
-chunk: "write an essay",
-chunkFa: "نوشتن مقاله"
-},
-
-{
-noun: {w: "vocabulary", fa: "لغات", pr: "ووکبیولری"},
-verb: {w: "learn", fa: "یاد گرفتن", pr: "لِرن"},
-chunk: "learn vocabulary",
-chunkFa: "یاد گرفتن لغات"
-},
-
-{
-noun: {w: "chapter", fa: "فصل", pr: "چپتر"},
-verb: {w: "review", fa: "مرور کردن", pr: "ریویو"},
-chunk: "review a chapter",
-chunkFa: "مرور یک فصل"
-},
-
-{
-noun: {w: "exercises", fa: "تمرین‌ها", pr: "اکسرسایزز"},
-verb: {w: "do", fa: "انجام دادن", pr: "دو"},
-chunk: "do exercises",
-chunkFa: "انجام تمرین‌ها"
-},
-
-{
-noun: {w: "notes", fa: "یادداشت", pr: "نوتس"},
-verb: {w: "take", fa: "برداشتن", pr: "تیک"},
-chunk: "take notes",
-chunkFa: "یادداشت برداری"
-},
-
-{
-noun: {w: "performance", fa: "عملکرد", pr: "پرفورمنس"},
-verb: {w: "evaluate", fa: "ارزیابی کردن", pr: "اِولیویت"},
-chunk: "evaluate performance",
-chunkFa: "ارزیابی عملکرد"
-},
-
-{
-noun: {w: "topic", fa: "موضوع", pr: "تاپیک"},
-verb: {w: "discuss", fa: "بحث کردن", pr: "دیسکاس"},
-chunk: "discuss a topic",
-chunkFa: "بحث درباره موضوع"
-},
-
-{
-noun: {w: "concept", fa: "مفهوم", pr: "کانسپت"},
-verb: {w: "explain", fa: "توضیح دادن", pr: "اکسپلین"},
-chunk: "explain a concept",
-chunkFa: "توضیح مفهوم"
-},
-
-{
-noun: {w: "questions", fa: "سوالات", pr: "کوئسچنز"},
-verb: {w: "ask", fa: "پرسیدن", pr: "اسک"},
-chunk: "ask questions",
-chunkFa: "سوال پرسیدن"
-},
-
-{
-noun: {w: "office hours", fa: "ساعات مشاوره", pr: "آفیس آورز"},
-verb: {w: "go to", fa: "رفتن به", pr: "گو تو"},
-chunk: "go to office hours",
-chunkFa: "رفتن به ساعات مشاوره"
-},
-
-{
-noun: {w: "coursework", fa: "کارهای درسی", pr: "کورس‌ورک"},
-verb: {w: "turn in", fa: "تحویل دادن", pr: "ترن این"},
-chunk: "turn in coursework",
-chunkFa: "تحویل کار درسی"
-},
-
-{
-noun: {w: "instructions", fa: "دستورالعمل", pr: "اینستراکشنز"},
-verb: {w: "follow", fa: "دنبال کردن", pr: "فالو"},
-chunk: "follow instructions",
-chunkFa: "دنبال کردن دستورالعمل"
-},
-
-{
-noun: {w: "exam", fa: "امتحان", pr: "اگزَم"},
-verb: {w: "take", fa: "دادن", pr: "تِیک"},
-chunk: "take an exam",
-chunkFa: "امتحان دادن"
-},
-
-{
-noun: {w: "study materials", fa: "منابع مطالعه", pr: "استادی متریالز"},
-verb: {w: "prepare", fa: "آماده کردن", pr: "پرپِر"},
-chunk: "prepare study materials",
-chunkFa: "آماده کردن منابع"
-},
-
-{
-noun: {w: "group work", fa: "کار گروهی", pr: "گروپ ورک"},
-verb: {w: "work on", fa: "کار کردن روی", pr: "ورک آن"},
-chunk: "work on group work",
-chunkFa: "کار روی کار گروهی"
-},
-
-{
-noun: {w: "quiz", fa: "کوئیز", pr: "کویز"},
-verb: {w: "take", fa: "دادن", pr: "تِیک"},
-chunk: "take a quiz",
-chunkFa: "دادن کوئیز"
-},
-
-{
-noun: {w: "project", fa: "پروژه", pr: "پراجکت"},
-verb: {w: "present", fa: "ارائه دادن", pr: "پرزنت"},
-chunk: "present a project",
-chunkFa: "ارائه پروژه"
-},
-
-{
-noun: {w: "discussion", fa: "بحث", pr: "دیسکاشن"},
-verb: {w: "lead", fa: "هدایت کردن", pr: "لید"},
-chunk: "lead a discussion",
-chunkFa: "هدایت بحث"
-},
-
-{
-noun: {w: "notes", fa: "یادداشت", pr: "نوتس"},
-verb: {w: "write", fa: "نوشتن", pr: "رایت"},
-chunk: "write notes",
-chunkFa: "نوشتن یادداشت"
-},
-
-{
-noun: {w: "schedule", fa: "برنامه زمانی", pr: "سکجول"},
-verb: {w: "set", fa: "تنظیم کردن", pr: "سِت"},
-chunk: "set a schedule",
-chunkFa: "تنظیم برنامه"
-},
-
-{
-noun: {w: "workshop", fa: "کارگاه", pr: "ورکشاپ"},
-verb: {w: "attend", fa: "شرکت کردن", pr: "اتند"},
-chunk: "attend a workshop",
-chunkFa: "شرکت در کارگاه"
-},
-
-{
-noun: {w: "homework", fa: "تکلیف", pr: "هوم‌ورک"},
-verb: {w: "check", fa: "بررسی کردن", pr: "چک"},
-chunk: "check homework",
-chunkFa: "بررسی تکلیف"
-},
-
-{
-noun: {w: "plan", fa: "برنامه", pr: "پلن"},
-verb: {w: "make", fa: "ساختن", pr: "مِیک"},
-chunk: "make a plan",
-chunkFa: "برنامه‌ریزی کردن"
-},
-
-{
-noun: {w: "notes", fa: "یادداشت", pr: "نوتس"},
-verb: {w: "review", fa: "مرور کردن", pr: "ریویو"},
-chunk: "review notes",
-chunkFa: "مرور یادداشت‌ها"
-},
-
-{
-noun: {w: "tutorial", fa: "جلسه آموزشی", pr: "توتوریال"},
-verb: {w: "attend", fa: "شرکت کردن", pr: "اتند"},
-chunk: "attend a tutorial",
-chunkFa: "شرکت در جلسه آموزشی"
-},
-
-{
-noun: {w: "essay", fa: "مقاله", pr: "اسِی"},
-verb: {w: "turn in", fa: "تحویل دادن", pr: "ترن این"},
-chunk: "turn in an essay",
-chunkFa: "تحویل مقاله"
-},
-
-{
-noun: {w: "clarification", fa: "شفاف‌سازی", pr: "کلریفیکیشن"},
-verb: {w: "ask for", fa: "درخواست کردن", pr: "اسک فور"},
-chunk: "ask for clarification",
-chunkFa: "درخواست توضیح بیشتر"
-},
-
-{
-noun: {w: "survey", fa: "نظرسنجی", pr: "سِروی"},
-verb: {w: "fill out", fa: "پر کردن", pr: "فیل آوت"},
-chunk: "fill out a survey",
-chunkFa: "پر کردن نظرسنجی"
-},
-
-{
-noun: {w: "manual", fa: "راهنما", pr: "منیوال"},
-verb: {w: "read", fa: "خواندن", pr: "رید"},
-chunk: "read a manual",
-chunkFa: "خواندن راهنما"
-},
-
-{
-noun: {w: "module", fa: "ماژول", pr: "ماجول"},
-verb: {w: "complete", fa: "کامل کردن", pr: "کامپلیت"},
-chunk: "complete a module",
-chunkFa: "تکمیل ماژول"
-},
-
-{
-noun: {w: "skills", fa: "مهارت‌ها", pr: "اسکیلز"},
-verb: {w: "practice", fa: "تمرین کردن", pr: "پرکتیس"},
-chunk: "practice skills",
-chunkFa: "تمرین مهارت‌ها"
-},
-
-{
-noun: {w: "assignment", fa: "تکلیف", pr: "اساینمنت"},
-verb: {w: "work on", fa: "کار کردن روی", pr: "ورک آن"},
-chunk: "work on an assignment",
-chunkFa: "کار روی تکلیف"
-},
-
-{
-noun: {w: "findings", fa: "یافته‌ها", pr: "فایندینگز"},
-verb: {w: "present", fa: "ارائه دادن", pr: "پرزنت"},
-chunk: "present findings",
-chunkFa: "ارائه نتایج"
-},
-
-
-  {en:"schedule an appointment", fa:"تنظیم قرار ملاقات",
-   desc:"ترکیب «schedule + appointment» یعنی تنظیم کردن قرار ملاقات.",
-   usage:"I need to schedule an appointment.\nباید یک قرار ملاقات تنظیم کنم."},
-
-  {en:"take attendance", fa:"حضور و غیاب گرفتن",
-   desc:"ترکیب «take + attendance» یعنی حضور و غیاب گرفتن.",
-   usage:"The teacher will take attendance.\nمعلم حضور و غیاب خواهد گرفت."},
-
-  {en:"give feedback", fa:"بازخورد دادن",
-   desc:"ترکیب «give + feedback» یعنی ارائه بازخورد.",
-   usage:"Please give feedback on my work.\nلطفاً دربارهٔ کارم بازخورد بده."},
-
-  {en:"attend a meeting", fa:"در جلسه شرکت کردن",
-   desc:"ترکیب «attend + meeting» یعنی شرکت در جلسه.",
-   usage:"I will attend a meeting today.\nامروز در جلسه شرکت می‌کنم."},
-
-  {en:"assign a task", fa:"واگذاری کار",
-   desc:"ترکیب «assign + task» یعنی سپردن یک وظیفه.",
-   usage:"The manager assigned a task to me.\nمدیر یک وظیفه به من سپرد."},
-
-  {en:"fix mistakes", fa:"اصلاح اشتباهات",
-   desc:"ترکیب «fix + mistakes» یعنی درست کردن اشتباهات.",
-   usage:"You should fix your mistakes.\nباید اشتباهاتت را اصلاح کنی."},
-
-  {en:"submit a proposal", fa:"ارسال پیشنهاد",
-   desc:"ترکیب «submit + proposal» یعنی ارسال یک پیشنهاد رسمی.",
-   usage:"They will submit a proposal tomorrow.\nآنها فردا یک پیشنهاد ارسال می‌کنند."},
-
-  {en:"do research", fa:"تحقیق کردن",
-   desc:"ترکیب «do + research» یعنی انجام تحقیق.",
-   usage:"We need to do research for the project.\nباید برای پروژه تحقیق کنیم."},
-
-  {en:"analyze data", fa:"تحلیل داده",
-   desc:"ترکیب «analyze + data» یعنی تحلیل داده‌ها.",
-   usage:"Scientists analyze data to find patterns.\nدانشمندان داده‌ها را تحلیل می‌کنند."},
-
-  {en:"write an essay", fa:"نوشتن مقاله",
-   desc:"ترکیب «write + essay» یعنی نوشتن مقاله.",
-   usage:"I must write an essay tonight.\nباید امشب یک مقاله بنویسم."},
-
-  {en:"learn vocabulary", fa:"یاد گرفتن لغات",
-   desc:"ترکیب «learn + vocabulary» یعنی یادگیری لغات.",
-   usage:"I try to learn vocabulary every day.\nسعی می‌کنم هر روز لغات یاد بگیرم."},
-
-  {en:"review a chapter", fa:"مرور یک فصل",
-   desc:"ترکیب «review + chapter» یعنی مرور یک فصل کتاب.",
-   usage:"You should review this chapter again.\nباید این فصل را دوباره مرور کنی."},
-
-  {en:"do exercises", fa:"انجام تمرین‌ها",
-   desc:"ترکیب «do + exercises» یعنی انجام تمرین.",
-   usage:"I do exercises every night.\nهر شب تمرین‌ها را انجام می‌دهم."},
-
-  {en:"take notes", fa:"یادداشت برداری",
-   desc:"ترکیب «take + notes» یعنی یادداشت برداشتن.",
-   usage:"Please take notes during class.\nلطفاً در کلاس یادداشت بردار."},
-
-  {en:"evaluate performance", fa:"ارزیابی عملکرد",
-   desc:"ترکیب «evaluate + performance» یعنی بررسی عملکرد.",
-   usage:"The manager will evaluate your performance.\nمدیر عملکردت را ارزیابی می‌کند."},
-
-  {en:"discuss a topic", fa:"بحث درباره موضوع",
-   desc:"ترکیب «discuss + topic» یعنی صحبت درباره یک موضوع.",
-   usage:"We will discuss this topic today.\nامروز درباره این موضوع بحث می‌کنیم."},
-
-  {en:"explain a concept", fa:"توضیح مفهوم",
-   desc:"ترکیب «explain + concept» یعنی توضیح دادن یک مفهوم.",
-   usage:"Can you explain this concept?\nمی‌توانی این مفهوم را توضیح بدهی؟"},
-
-  {en:"ask questions", fa:"سؤال پرسیدن",
-   desc:"ترکیب «ask + questions» یعنی پرسیدن سؤال.",
-   usage:"Feel free to ask questions.\nآزادانه سؤال بپرس."},
-
-  {en:"go to office hours", fa:"رفتن به ساعات مشاوره",
-   desc:"ترکیب «go to + office hours» یعنی مراجعه به ساعات مشاوره.",
-   usage:"I will go to office hours today.\nامروز به ساعات مشاوره می‌روم."},
-
-  {en:"turn in coursework", fa:"تحویل کار درسی",
-   desc:"ترکیب «turn in + coursework» یعنی تحویل دادن کار درسی.",
-   usage:"You must turn in your coursework.\nباید کار درسی‌ات را تحویل بدهی."},
-
-  {en:"follow instructions", fa:"دنبال کردن دستورالعمل",
-   desc:"ترکیب «follow + instructions» یعنی رعایت دستورالعمل‌ها.",
-   usage:"Please follow the instructions.\nلطفاً دستورالعمل‌ها را دنبال کن."},
-
-  {en:"take an exam", fa:"امتحان دادن",
-   desc:"ترکیب «take + exam» یعنی شرکت در امتحان.",
-   usage:"I will take an exam tomorrow.\nفردا امتحان می‌دهم."},
-
-{en:"prepare study materials", fa:"آماده کردن منابع مطالعه",
-   desc:"ترکیب «prepare + study materials» یعنی آماده‌سازی منابع مطالعه.",
-   usage:"I need to prepare study materials.\nباید منابع مطالعه را آماده کنم."},
-
-  {en:"work on group work", fa:"کار روی کار گروهی",
-   desc:"ترکیب «work on + group work» یعنی کار کردن روی پروژه گروهی.",
-   usage:"We will work on group work today.\nامروز روی کار گروهی کار می‌کنیم."},
-
-  {en:"take a quiz", fa:"دادن کوئیز",
-   desc:"ترکیب «take + quiz» یعنی شرکت در کوئیز.",
-   usage:"We will take a quiz today.\nامروز کوئیز می‌دهیم."},
-
-  {en:"present a project", fa:"ارائه پروژه",
-   desc:"ترکیب «present + project» یعنی ارائه پروژه.",
-   usage:"I will present my project tomorrow.\nفردا پروژه‌ام را ارائه می‌دهم."}
-]
+  {
+    en: "schedule an appointment",
+    fa: "تنظیم قرار ملاقات",
+    desc: "ترکیب «schedule + appointment» یعنی تنظیم کردن قرار ملاقات.",
+    usage: "I need to schedule an appointment.\nباید یک قرار ملاقات تنظیم کنم."
+  },
+  {
+    en: "take attendance",
+    fa: "حضور و غیاب گرفتن",
+    desc: "ترکیب «take + attendance» یعنی حضور و غیاب گرفتن.",
+    usage: "The teacher will take attendance.\nمعلم حضور و غیاب خواهد گرفت."
+  },
+  {
+    en: "give feedback",
+    fa: "بازخورد دادن",
+    desc: "ترکیب «give + feedback» یعنی ارائه بازخورد.",
+    usage: "Please give feedback on my work.\nلطفاً دربارهٔ کارم بازخورد بده."
+  },
+  {
+    en: "attend a meeting",
+    fa: "در جلسه شرکت کردن",
+    desc: "ترکیب «attend + meeting» یعنی شرکت در جلسه.",
+    usage: "I will attend a meeting today.\nامروز در جلسه شرکت می‌کنم."
+  },
+  {
+    en: "assign a task",
+    fa: "واگذاری کار",
+    desc: "ترکیب «assign + task» یعنی سپردن یک وظیفه.",
+    usage: "The manager assigned a task to me.\nمدیر یک وظیفه به من سپرد."
+  },
+  {
+    en: "fix mistakes",
+    fa: "اصلاح اشتباهات",
+    desc: "ترکیب «fix + mistakes» یعنی درست کردن اشتباهات.",
+    usage: "You should fix your mistakes.\nباید اشتباهاتت را اصلاح کنی."
+  },
+  {
+    en: "submit a proposal",
+    fa: "ارسال پیشنهاد",
+    desc: "ترکیب «submit + proposal» یعنی ارسال یک پیشنهاد رسمی.",
+    usage: "They will submit a proposal tomorrow.\nآنها فردا یک پیشنهاد ارسال می‌کنند."
+  },
+  {
+    en: "do research",
+    fa: "تحقیق کردن",
+    desc: "ترکیب «do + research» یعنی انجام تحقیق.",
+    usage: "We need to do research for the project.\nباید برای پروژه تحقیق کنیم."
+  },
+  {
+    en: "analyze data",
+    fa: "تحلیل داده",
+    desc: "ترکیب «analyze + data» یعنی تحلیل داده‌ها.",
+    usage: "Scientists analyze data to find patterns.\nدانشمندان داده‌ها را تحلیل می‌کنند."
+  },
+  {
+    en: "write an essay",
+    fa: "نوشتن مقاله",
+    desc: "ترکیب «write + essay» یعنی نوشتن مقاله.",
+    usage: "I must write an essay tonight.\nباید امشب یک مقاله بنویسم."
+  },
+  {
+    en: "learn vocabulary",
+    fa: "یاد گرفتن لغات",
+    desc: "ترکیب «learn + vocabulary» یعنی یادگیری لغات.",
+    usage: "I try to learn vocabulary every day.\nسعی می‌کنم هر روز لغات یاد بگیرم."
+  },
+  {
+    en: "review a chapter",
+    fa: "مرور یک فصل",
+    desc: "ترکیب «review + chapter» یعنی مرور یک فصل کتاب.",
+    usage: "You should review this chapter again.\nباید این فصل را دوباره مرور کنی."
+  },
+  {
+    en: "do exercises",
+    fa: "انجام تمرین‌ها",
+    desc: "ترکیب «do + exercises» یعنی انجام تمرین.",
+    usage: "I do exercises every night.\nهر شب تمرین‌ها را انجام می‌دهم."
+  },
+  {
+    en: "take notes",
+    fa: "یادداشت برداری",
+    desc: "ترکیب «take + notes» یعنی یادداشت برداشتن.",
+    usage: "Please take notes during class.\nلطفاً در کلاس یادداشت بردار."
+  },
+  {
+    en: "evaluate performance",
+    fa: "ارزیابی عملکرد",
+    desc: "ترکیب «evaluate + performance» یعنی بررسی عملکرد.",
+    usage: "The manager will evaluate your performance.\nمدیر عملکردت را ارزیابی می‌کند."
+  },
+  {
+    en: "discuss a topic",
+    fa: "بحث درباره موضوع",
+    desc: "ترکیب «discuss + topic» یعنی صحبت درباره یک موضوع.",
+    usage: "We will discuss this topic today.\nامروز درباره این موضوع بحث می‌کنیم."
+  },
+  {
+    en: "explain a concept",
+    fa: "توضیح مفهوم",
+    desc: "ترکیب «explain + concept» یعنی توضیح دادن یک مفهوم.",
+    usage: "Can you explain this concept?\nمی‌توانی این مفهوم را توضیح بدهی؟"
+  },
+  {
+    en: "ask questions",
+    fa: "سؤال پرسیدن",
+    desc: "ترکیب «ask + questions» یعنی پرسیدن سؤال.",
+    usage: "Feel free to ask questions.\nآزادانه سؤال بپرس."
+  },
+  {
+    en: "go to office hours",
+    fa: "رفتن به ساعات مشاوره",
+    desc: "ترکیب «go to + office hours» یعنی مراجعه به ساعات مشاوره.",
+    usage: "I will go to office hours today.\nامروز به ساعات مشاوره می‌روم."
+  },
+  {
+    en: "turn in coursework",
+    fa: "تحویل کار درسی",
+    desc: "ترکیب «turn in + coursework» یعنی تحویل دادن کار درسی.",
+    usage: "You must turn in your coursework.\nباید کار درسی‌ات را تحویل بدهی."
+  },
+  {
+    en: "follow instructions",
+    fa: "دنبال کردن دستورالعمل",
+    desc: "ترکیب «follow + instructions» یعنی رعایت دستورالعمل‌ها.",
+    usage: "Please follow the instructions.\nلطفاً دستورالعمل‌ها را دنبال کن."
+  },
+  {
+    en: "take an exam",
+    fa: "امتحان دادن",
+    desc: "ترکیب «take + exam» یعنی شرکت در امتحان.",
+    usage: "I will take an exam tomorrow.\nفردا امتحان می‌دهم."
+  },
+  {
+    en: "prepare study materials",
+    fa: "آماده کردن منابع مطالعه",
+    desc: "ترکیب «prepare + study materials» یعنی آماده‌سازی منابع مطالعه.",
+    usage: "I need to prepare study materials.\nباید منابع مطالعه را آماده کنم."
+  },
+  {
+    en: "work on group work",
+    fa: "کار روی کار گروهی",
+    desc: "ترکیب «work on + group work» یعنی کار کردن روی پروژه گروهی.",
+    usage: "We will work on group work today.\nامروز روی کار گروهی کار می‌کنیم."
+  },
+  {
+    en: "take a quiz",
+    fa: "دادن کوئیز",
+    desc: "ترکیب «take + quiz» یعنی شرکت در کوئیز.",
+    usage: "We will take a quiz today.\nامروز کوئیز می‌دهیم."
+  },
+  {
+    en: "present a project",
+    fa: "ارائه پروژه",
+    desc: "ترکیب «present + project» یعنی ارائه پروژه.",
+    usage: "I will present my project tomorrow.\nفردا پروژه‌ام را ارائه می‌دهم."
+  }
+];
 
 let index = 0;
 
@@ -623,6 +377,7 @@ const usageEl   = document.getElementById("usage");
 const counterEl = document.getElementById("counter");
 const indexLabel= document.getElementById("indexLabel");
 const progressEl= document.getElementById("progress");
+const themeToggle = document.getElementById("themeToggle");
 
 function renderCard(){
   const item = chunks[index];
@@ -637,7 +392,7 @@ function renderCard(){
 }
 renderCard();
 
-/* درگ برای کارت بعدی/قبلی، بدون جابه‌جایی جای کارت روی صفحه */
+// درگ برای کارت بعدی/قبلی
 let startX = 0;
 let dragging = false;
 
@@ -674,15 +429,15 @@ cardEl.addEventListener("mousedown", startDrag);
 window.addEventListener("mousemove", onDrag);
 window.addEventListener("mouseup", endDrag);
 
-cardEl.addEventListener("touchstart", startDrag,{passive:true});
-window.addEventListener("touchmove", onDrag,{passive:true});
+cardEl.addEventListener("touchstart", startDrag, {passive:true});
+window.addEventListener("touchmove", onDrag, {passive:true});
 window.addEventListener("touchend", endDrag);
 
-/* تم روشن/تیره بدون تکون خوردن کارت */
-document.getElementById("themeToggle").onclick = () => {
+// تم روشن/تیره
+themeToggle.onclick = () => {
   document.body.classList.toggle("light");
   themeToggle.textContent =
-    document.body.classList.contains("light") ? "☀" : "🌙";
+    document.body.classList.contains("light") ? "☀️" : "🌙";
 };
 </script>
 
