@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جزوه لغات پایه – VisionOS Edition</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600&display=swap');
+
+/* ---------------------- */
+/*   رنگ‌ها و متغیرها     */
+/* ---------------------- */
+:root {
+    --accent:#91C200;
+    --accent-soft:rgba(145,194,0,0.18);
+    --bg:#0d0f12;
+    --glass:rgba(255,255,255,0.06);
+    --text:#f1f5f9;
+    --sub:#9ca3af;
+    --border:rgba(255,255,255,0.12);
+}
+
+/* حالت روشن */
+.light {
+    --bg:#f5f7fa;
+    --glass:rgba(255,255,255,0.55);
+    --text:#1e293b;
+    --sub:#475569;
+    --border:rgba(0,0,0,0.12);
+}
+
+/* ---------------------- */
+/*        پایه‌ها         */
+/* ---------------------- */
+body {
+    margin:0;
+    padding:0;
+    background:var(--bg);
+    font-family:"Vazirmatn",sans-serif;
+    color:var(--text);
+    display:flex;
+    justify-content:center;
+    padding:40px 12px;
+    transition:0.35s ease;
+}
+
+/* ---------------------- */
+/*   کارت اصلی VisionOS   */
+/* ---------------------- */
+.sheet {
+    width:100%;
+    max-width:850px;
+    background:var(--glass);
+    padding:40px;
+    border-radius:32px;
+    border:1px solid var(--border);
+    backdrop-filter:blur(40px) saturate(180%);
+    box-shadow:
+        0 30px 80px rgba(0,0,0,0.45),
+        inset 0 0 40px rgba(255,255,255,0.05);
+    transition:0.35s ease;
+}
+
+/* ---------------------- */
+/*        هدر             */
+/* ---------------------- */
+.header {
+    display:flex;
+    justify-content:flex-end;
+    margin-bottom:24px;
+}
+
+.theme-toggle {
+    font-size:1.9rem;
+    cursor:pointer;
+    user-select:none;
+    padding:6px 12px;
+    border-radius:14px;
+    background:rgba(255,255,255,0.08);
+    transition:0.25s ease;
+}
+
+.theme-toggle:hover {
+    background:rgba(255,255,255,0.18);
+}
+
+/* ---------------------- */
+/*        عنوان‌ها        */
+/* ---------------------- */
+.title {
+    font-size:2rem;
+    font-weight:700;
+    text-align:center;
+    margin-bottom:8px;
+    letter-spacing:-0.5px;
+}
+
+.subtitle {
+    text-align:center;
+    color:var(--sub);
+    margin-bottom:30px;
+    font-size:1rem;
+}
+
+/* ---------------------- */
+/*   دسته‌بندی‌ها         */
+/* ---------------------- */
+.category {
+    margin-top:40px;
+    margin-bottom:20px;
+    font-size:1.4rem;
+    font-weight:700;
+    color:var(--accent);
+    border-bottom:1px solid var(--border);
+    padding-bottom:8px;
+}
+
+/* ---------------------- */
+/*   کارت لغت             */
+/* ---------------------- */
+.word-card {
+    background:rgba(255,255,255,0.05);
+    border:1px solid var(--border);
+    padding:22px 26px;
+    border-radius:20px;
+    margin-bottom:16px;
+    transition:0.25s ease;
+    backdrop-filter:blur(20px);
+}
+
+.word-card:hover {
+    border-color:var(--accent);
+    background:rgba(145,194,0,0.08);
+    transform:translateY(-2px);
+}
+
+.word {
+    font-size:1.5rem;
+    font-weight:700;
+    margin-bottom:4px;
+}
+
+.fa {
+    color:var(--sub);
+    font-size:1.05rem;
+    margin-bottom:4px;
+}
+
+.pr {
+    font-size:1rem;
+    color:var(--accent);
+    margin-bottom:10px;
+}
+
+.type {
+    font-size:0.9rem;
+    color:var(--sub);
+    margin-bottom:10px;
+}
+
+.desc {
+    font-size:0.95rem;
+    line-height:1.7;
+    margin-bottom:12px;
+}
+
+.example {
+    margin-top:10px;
+    background:rgba(255,255,255,0.08);
+    padding:12px 14px;
+    border-radius:14px;
+    font-size:0.95rem;
+    line-height:1.7;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sheet">
+
+    <div class="header">
+        <div id="themeToggle" class="theme-toggle">🌙</div>
+    </div>
+
+    <div class="title">جزوه لغات روز سوم</div>
+    <div class="subtitle">25 لغت ضروری درباره زمان – همراه با معنی، تلفظ، توضیح و مثال</div>
+
+    <div id="content"></div>
+
+</div>
+
+<script>
+/* داده‌ها */
+const words = [
+  {w:"today", fa:"امروز", pr:"تُدِی", type:"اسم", desc:"روز جاری، روزی که در آن هستیم."},
+  {w:"tomorrow", fa:"فردا", pr:"تُمورو", type:"اسم", desc:"روز بعد از امروز."},
+  {w:"yesterday", fa:"دیروز", pr:"یِستِردِی", type:"اسم", desc:"روز قبل از امروز."},
+  {w:"now", fa:"حالا", pr:"ناو", type:"قید", desc:"در این لحظه، اکنون."},
+  {w:"later", fa:"بعداً", pr:"لِیتِر", type:"قید", desc:"در زمان آینده، پس از این."},
+  {w:"soon", fa:"به زودی", pr:"سُون", type:"قید", desc:"در نزدیکترین زمان، به زودی."},
+  {w:"early", fa:"زود", pr:"اِرلی", type:"قید", desc:"پیش از وقت معمول، در آغاز."},
+  {w:"late", fa:"دیر", pr:"لِیت", type:"قید", desc:"پس از وقت معمول، با تأخیر."},
+  {w:"morning", fa:"صبح", pr:"مورنینگ", type:"اسم", desc:"بخش اول روز از طلوع آفتاب تا ظهر."},
+  {w:"afternoon", fa:"بعد از ظهر", pr:"اَفتِرنون", type:"اسم", desc:"محدوده زمانی از ظهر تا غروب."},
+  {w:"evening", fa:"عصر", pr:"ایوْنینگ", type:"اسم", desc:"اواخر روز، هنگام غروب آفتاب."},
+  {w:"night", fa:"شب", pr:"نایت", type:"اسم", desc:"زمان تاریکی بعد از غروب تا طلوع."},
+  {w:"week", fa:"هفته", pr:"ویک", type:"اسم", desc:"دوره هفت روزه."},
+  {w:"month", fa:"ماه", pr:"مَانث", type:"اسم", desc:"یکی از دوازده بخش سال."},
+  {w:"year", fa:"سال", pr:"ییر", type:"اسم", desc:"مدت دوازده ماه."},
+  {w:"hour", fa:"ساعت", pr:"آوِر", type:"اسم", desc:"واحد زمان برابر ۶۰ دقیقه."},
+  {w:"minute", fa:"دقیقه", pr:"مینیت", type:"اسم", desc:"واحد زمان برابر ۶۰ ثانیه."},
+  {w:"always", fa:"همیشه", pr:"اُلویز", type:"قید", desc:"در همه زمان‌ها، بدون استثنا."},
+  {w:"usually", fa:"معمولاً", pr:"یووْژوالی", type:"قید", desc:"در بیشتر مواقع، به طور معمول."},
+  {w:"sometimes", fa:"گاهی", pr:"سامتایمز", type:"قید", desc:"هر از گاهی، نه همیشه."},
+  {w:"never", fa:"هرگز", pr:"نِوِر", type:"قید", desc:"در هیچ زمانی، به هیچ وجه."},
+  {w:"before", fa:"قبل", pr:"بیفور", type:"قید", desc:"در زمان پیشین، پیش از این."},
+  {w:"after", fa:"بعد", pr:"اَفتِر", type:"قید", desc:"در زمان بعدی، پس از آن."},
+  {w:"start", fa:"شروع", pr:"اِستارت", type:"اسم", desc:"آغاز، نقطه شروع."},
+  {w:"finish", fa:"پایان", pr:"فینیش", type:"اسم", desc:"پایان، نقطه اتمام."}
+];
+
+/* مثال‌ساز */
+function example(w) {
+    const ex = {
+  today: "Today is sunny. — امروز آفتابی است.",
+  tomorrow: "See you tomorrow. — فردا می‌بینمت.",
+  yesterday: "Yesterday was Monday. — دیروز دوشنبه بود.",
+  now: "I am busy now. — الان سرم شلوغ است.",
+  later: "We can talk later. — می‌توانیم بعداً صحبت کنیم.",
+  soon: "She will arrive soon. — او به زودی می‌رسد.",
+  early: "I wake up early. — من زود بیدار می‌شوم.",
+  late: "Don't stay up late. — دیر وقت بیدار نمان.",
+  morning: "Good morning! — صبح بخیر!",
+  afternoon: "I study in the afternoon. — بعد از ظهر درس می‌خوانم.",
+  evening: "We eat together in the evening. — عصر با هم غذا می‌خوریم.",
+  night: "It is cold at night. — شب هوا سرد است.",
+  week: "I will visit you next week. — هفته آینده به دیدنت می‌آیم.",
+  month: "This month is busy. — این ماه شلوغ است.",
+  year: "Next year I will travel. — سال بعد سفر خواهم کرد.",
+  hour: "It took one hour. — یک ساعت طول کشید.",
+  minute: "Wait a minute. — یک دقیقه صبر کن.",
+  always: "He always smiles. — او همیشه لبخند می‌زند.",
+  usually: "I usually drink tea. — من معمولاً چای می‌نوشم.",
+  sometimes: "Sometimes it rains. — گاهی باران می‌بارد.",
+  never: "I never forget. — من هرگز فراموش نمی‌کنم.",
+  before: "Think before you speak. — قبل از حرف زدن فکر کن.",
+  after: "We will go after lunch. — بعد از ناهار می‌رویم.",
+  start: "Let's start the work. — بیا کار را شروع کنیم.",
+  finish: "When will you finish? — کی تمام می‌کنی؟"
+    };
+    return ex[w] || "Example not found.";
+}
+
+/* دسته‌بندی بر اساس گروه‌های معنایی (متناسب با کلمات زمان) */
+const categories = {
+    "روزها": words.slice(0, 3),
+    "قیدهای زمان (عمومی)": words.slice(3, 8),
+    "اوقات روز": words.slice(8, 12),
+    "واحدهای زمان": words.slice(12, 17),
+    "قیدهای تکرار و ترتیب": words.slice(17, 23),
+    "شروع و پایان": words.slice(23, 25)
+};
+
+/* نمایش */
+const content = document.getElementById("content");
+
+content.innerHTML = Object.keys(categories).map(cat => `
+    <div class="category">${cat}</div>
+    ${categories[cat].map(x => `
+        <div class="word-card">
+            <div class="word">${x.w}</div>
+            <div class="fa">${x.fa}</div>
+            <div class="pr">تلفظ: ${x.pr}</div>
+            <div class="type">نقش دستوری: ${x.type}</div>
+            <div class="desc">${x.desc}</div>
+            <div class="example">${example(x.w)}</div>
+        </div>
+    `).join("")}
+`).join("");
+
+/* تم روشن/تیره */
+document.getElementById("themeToggle").onclick = ()=>{
+    document.body.classList.toggle("light");
+    const toggle = document.getElementById("themeToggle");
+    toggle.textContent = document.body.classList.contains("light") ? "☀️" : "🌙";
+};
+</script>
+
+</body>
+</html>
