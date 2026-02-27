@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>برگه سوالات – VisionOS Style</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600&display=swap');
+
+:root {
+    --accent:#91C200;
+    --accent-glow:rgba(145,194,0,0.35);
+    --bg:#0c0d10;
+    --glass:rgba(255,255,255,0.06);
+    --text:#f1f5f9;
+    --sub:#9ca3af;
+    --border:rgba(255,255,255,0.12);
+}
+
+.light {
+    --bg:#f5f7fa;
+    --glass:rgba(255,255,255,0.55);
+    --text:#1e293b;
+    --sub:#475569;
+    --border:rgba(0,0,0,0.12);
+}
+
+body {
+    margin:0;
+    padding:0;
+    background:var(--bg);
+    font-family:"Vazirmatn",sans-serif;
+    color:var(--text);
+    display:flex;
+    justify-content:center;
+    padding:40px 12px;
+    transition:0.35s ease;
+    backdrop-filter:blur(40px);
+}
+
+.sheet {
+    width:100%;
+    max-width:780px;
+    background:var(--glass);
+    padding:40px;
+    border-radius:32px;
+    border:1px solid var(--border);
+    backdrop-filter:blur(40px) saturate(180%);
+    box-shadow:0 30px 80px rgba(0,0,0,0.45), inset 0 0 40px rgba(255,255,255,0.05);
+    transition:0.35s ease;
+}
+
+.header {
+    display:flex;
+    justify-content:flex-end;
+    margin-bottom:24px;
+}
+
+.theme-toggle {
+    font-size:1.9rem;
+    cursor:pointer;
+    user-select:none;
+    padding:6px 12px;
+    border-radius:14px;
+    background:rgba(255,255,255,0.08);
+    transition:0.25s ease;
+}
+
+.theme-toggle:hover {
+    background:rgba(255,255,255,0.18);
+}
+
+.title {
+    font-size:2rem;
+    font-weight:700;
+    text-align:center;
+    margin-bottom:8px;
+    letter-spacing:-0.5px;
+}
+
+.subtitle {
+    text-align:center;
+    color:var(--sub);
+    margin-bottom:30px;
+    font-size:1rem;
+}
+
+.search-box {
+    width:100%;
+    padding:16px 20px;
+    border-radius:18px;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,0.08);
+    color:var(--text);
+    margin-bottom:26px;
+    font-size:1rem;
+    transition:0.25s ease;
+}
+
+.search-box:focus {
+    border-color:var(--accent);
+    box-shadow:0 0 0 4px var(--accent-glow);
+}
+
+.list {
+    max-height:65vh;
+    overflow-y:auto;
+    padding-right:6px;
+    scroll-behavior:smooth;
+}
+
+.list::-webkit-scrollbar {
+    width:8px;
+}
+.list::-webkit-scrollbar-thumb {
+    background:var(--accent);
+    border-radius:10px;
+}
+.list::-webkit-scrollbar-track {
+    background:rgba(255,255,255,0.05);
+}
+
+.question {
+    background:rgba(255,255,255,0.05);
+    border:1px solid var(--border);
+    padding:22px 24px;
+    border-radius:20px;
+    margin-bottom:18px;
+    transition:0.25s ease;
+    backdrop-filter:blur(20px);
+}
+
+.question:hover {
+    border-color:var(--accent);
+    background:rgba(145,194,0,0.08);
+    transform:translateY(-2px);
+}
+
+.q-en {
+    font-size:1.2rem;
+    font-weight:600;
+    margin-bottom:8px;
+}
+
+.q-fa {
+    color:var(--sub);
+    margin-bottom:6px;
+    font-size:0.95rem;
+}
+
+.q-pr {
+    color:var(--accent);
+    font-size:0.9rem;
+    margin-bottom:8px;
+    font-style:italic;
+}
+
+.q-opts {
+    background:rgba(255,255,255,0.1);
+    padding:8px 12px;
+    border-radius:10px;
+    margin-bottom:12px;
+    font-size:0.9rem;
+}
+
+.answer {
+    display:inline-block;
+    background:var(--accent);
+    color:#0f172a;
+    padding:8px 14px;
+    border-radius:10px;
+    font-weight:600;
+    font-size:0.9rem;
+    box-shadow:0 10px 25px var(--accent-glow);
+}
+</style>
+</head>
+
+<body>
+
+<div class="sheet">
+
+    <div class="header">
+        <div id="themeToggle" class="theme-toggle">🌙</div>
+    </div>
+
+    <div class="title"> سوالات روز چهارم – خانه و وسایل </div>
+    <div class="subtitle">۲۶ لغت ضروری درباره خانه، اتاق‌ها، مبلمان و ...</div>
+
+    <input id="search" class="search-box" placeholder="جستجو در سوالات...">
+
+    <div id="list" class="list"></div>
+
+</div>
+
+<script>
+/* ========== داده‌های جدید ========== */
+
+// تشخیصی (پر کردن جای خالی)
+const diagnostic = [
+  {en:"I live in an ___.",fa:"من در یک آپارتمان زندگی می‌کنم.",pr:"آی لیو این اَن اَپارتمِنت",opts:["apartment","house","room"],answer:"apartment"},
+  {en:"Please close the ___.",fa:"لطفاً در را ببند.",pr:"پلیز کلوز دِ دور",opts:["door","window","wall"],answer:"door"},
+  {en:"Open the ___.",fa:"پنجره را باز کن.",pr:"اوپن دِ ویندو",opts:["window","door","lamp"],answer:"window"},
+  {en:"The ___ is white.",fa:"دیوار سفید است.",pr:"دِ وال ایز وایت",opts:["wall","floor","ceiling"],answer:"wall"},
+  {en:"The ___ is made of wood.",fa:"کف از چوب ساخته شده است.",pr:"دِ فلور ایز مِید آف وود",opts:["floor","ceiling","wall"],answer:"floor"},
+  {en:"The ___ is high.",fa:"سقف بلند است.",pr:"دِ سیلینگ ایز های",opts:["ceiling","floor","wall"],answer:"ceiling"},
+  {en:"The ___ is comfortable.",fa:"تخت راحت است.",pr:"دِ بِد ایز کامفورتَبِل",opts:["bed","sofa","chair"],answer:"bed"},
+  {en:"Put the book on the ___.",fa:"کتاب را روی میز بگذار.",pr:"پوت دِ بوک آن دِ تِیبِل",opts:["table","chair","sofa"],answer:"table"},
+  {en:"Sit on the ___.",fa:"روی صندلی بنشین.",pr:"سیت آن دِ چِر",opts:["chair","sofa","bed"],answer:"chair"},
+  {en:"Turn on the ___.",fa:"چراغ را روشن کن.",pr:"تِرن آن دِ لَمپ",opts:["lamp","light","key"],answer:"lamp"},
+  {en:"I lost my ___.",fa:"کلیدم را گم کردم.",pr:"آی لاست مای کی",opts:["key","lock","door"],answer:"key"},
+  {en:"The ___ is broken.",fa:"قفل شکسته است.",pr:"دِ لاک ایز بروکِن",opts:["lock","key","door"],answer:"lock"},
+  {en:"The room is ___.",fa:"اتاق تمیز است.",pr:"دِ روم ایز کلین",opts:["clean","dirty","nice"],answer:"clean"},
+  {en:"The floor is ___.",fa:"کف زمین کثیف است.",pr:"دِ فلور ایز دیرتی",opts:["dirty","clean","wet"],answer:"dirty"},
+  {en:"The ___ is high.",fa:"اجاره بالا است.",pr:"دِ رِنت ایز های",opts:["rent","price","cost"],answer:"rent"},
+  {en:"My ___ is friendly.",fa:"همسایه‌ام خوش‌برخورد است.",pr:"مای نِیبور ایز فرِندلی",opts:["neighbor","friend","brother"],answer:"neighbor"},
+  {en:"That ___ is tall.",fa:"آن ساختمان بلند است.",pr:"دَت بیلدینگ ایز تال",opts:["building","house","apartment"],answer:"building"}
+];
+
+// جمله‌سازی (مرتب کردن کلمات)
+const combine = [
+  {words:["I","in","live","an","apartment"],fa:"من در یک آپارتمان زندگی می‌کنم.",pr:"آی لیو این اَن اَپارتمِنت",answer:"i live in an apartment"},
+  {words:["close","door","please","the"],fa:"لطفاً در را ببند.",pr:"پلیز کلوز دِ دور",answer:"please close the door"},
+  {words:["open","window","the"],fa:"پنجره را باز کن.",pr:"اوپن دِ ویندو",answer:"open the window"},
+  {words:["wall","white","the","is"],fa:"دیوار سفید است.",pr:"دِ وال ایز وایت",answer:"the wall is white"},
+  {words:["floor","wood","of","made","is","the"],fa:"کف از چوب ساخته شده است.",pr:"دِ فلور ایز مِید آف وود",answer:"the floor is made of wood"},
+  {words:["ceiling","high","the","is"],fa:"سقف بلند است.",pr:"دِ سیلینگ ایز های",answer:"the ceiling is high"},
+  {words:["bed","comfortable","the","is"],fa:"تخت راحت است.",pr:"دِ بِد ایز کامفورتَبِل",answer:"the bed is comfortable"},
+  {words:["book","on","put","table","the","the"],fa:"کتاب را روی میز بگذار.",pr:"پوت دِ بوک آن دِ تِیبِل",answer:"put the book on the table"},
+  {words:["on","sit","chair","the"],fa:"روی صندلی بنشین.",pr:"سیت آن دِ چِر",answer:"sit on the chair"},
+  {words:["sofa","soft","the","is"],fa:"مبل نرم است.",pr:"دِ سوفا ایز سافت",answer:"the sofa is soft"},
+  {words:["lamp","turn","on","the"],fa:"چراغ را روشن کن.",pr:"تِرن آن دِ لَمپ",answer:"turn on the lamp"},
+  {words:["lost","key","I","my"],fa:"کلیدم را گم کردم.",pr:"آی لاست مای کی",answer:"i lost my key"},
+  {words:["lock","broken","the","is"],fa:"قفل شکسته است.",pr:"دِ لاک ایز بروکِن",answer:"the lock is broken"},
+  {words:["room","clean","the","is"],fa:"اتاق تمیز است.",pr:"دِ روم ایز کلین",answer:"the room is clean"},
+  {words:["floor","dirty","the","is"],fa:"کف زمین کثیف است.",pr:"دِ فلور ایز دیرتی",answer:"the floor is dirty"},
+  {words:["rent","high","the","is"],fa:"اجاره بالا است.",pr:"دِ رِنت ایز های",answer:"the rent is high"},
+  {words:["neighbor","friendly","my","is"],fa:"همسایه‌ام خوش‌برخورد است.",pr:"مای نِیبور ایز فرِندلی",answer:"my neighbor is friendly"},
+  {words:["building","tall","that","is"],fa:"آن ساختمان بلند است.",pr:"دَت بیلدینگ ایز تال",answer:"that building is tall"}
+];
+
+// حدس‌زدن نوع ۱ (انتخاب کلمه انگلیسی از روی معنی فارسی)
+const guessMeaning = [
+  {q:"کدام کلمه معنی «خانه» است؟",opts:["home","house","building"],fa:"خانه",pr:"هُوم",answer:"home"},
+  {q:"کدام کلمه معنی «خانه (ویلا)» است؟",opts:["house","home","apartment"],fa:"خانه (ویلا)",pr:"هاوس",answer:"house"},
+  {q:"کدام کلمه معنی «آپارتمان» است؟",opts:["apartment","building","room"],fa:"آپارتمان",pr:"اَپارتمِنت",answer:"apartment"},
+  {q:"کدام کلمه معنی «اتاق» است؟",opts:["room","bedroom","bathroom"],fa:"اتاق",pr:"روم",answer:"room"},
+  {q:"کدام کلمه معنی «اتاق خواب» است؟",opts:["bedroom","living room","kitchen"],fa:"اتاق خواب",pr:"بِدروم",answer:"bedroom"},
+  {q:"کدام کلمه معنی «حمام» است؟",opts:["bathroom","kitchen","bedroom"],fa:"حمام",pr:"بَثروم",answer:"bathroom"},
+  {q:"کدام کلمه معنی «آشپزخانه» است؟",opts:["kitchen","bathroom","living room"],fa:"آشپزخانه",pr:"کیچِن",answer:"kitchen"},
+  {q:"کدام کلمه معنی «اتاق نشیمن» است؟",opts:["living room","bedroom","kitchen"],fa:"اتاق نشیمن",pr:"لیوینگ روم",answer:"living room"},
+  {q:"کدام کلمه معنی «در» است؟",opts:["door","window","wall"],fa:"در",pr:"دور",answer:"door"},
+  {q:"کدام کلمه معنی «پنجره» است؟",opts:["window","door","wall"],fa:"پنجره",pr:"ویندو",answer:"window"},
+  {q:"کدام کلمه معنی «دیوار» است؟",opts:["wall","floor","ceiling"],fa:"دیوار",pr:"وال",answer:"wall"},
+  {q:"کدام کلمه معنی «کف» است؟",opts:["floor","wall","ceiling"],fa:"کف",pr:"فلور",answer:"floor"},
+  {q:"کدام کلمه معنی «سقف» است؟",opts:["ceiling","floor","wall"],fa:"سقف",pr:"سیلینگ",answer:"ceiling"},
+  {q:"کدام کلمه معنی «تخت» است؟",opts:["bed","sofa","chair"],fa:"تخت",pr:"بِد",answer:"bed"},
+  {q:"کدام کلمه معنی «میز» است؟",opts:["table","chair","sofa"],fa:"میز",pr:"تِیبِل",answer:"table"},
+  {q:"کدام کلمه معنی «صندلی» است؟",opts:["chair","table","sofa"],fa:"صندلی",pr:"چِر",answer:"chair"},
+  {q:"کدام کلمه معنی «مبل» است؟",opts:["sofa","chair","bed"],fa:"مبل",pr:"سوفا",answer:"sofa"},
+  {q:"کدام کلمه معنی «نور» است؟",opts:["light","lamp","bulb"],fa:"نور",pr:"لایت",answer:"light"},
+  {q:"کدام کلمه معنی «چراغ» است؟",opts:["lamp","light","bulb"],fa:"چراغ",pr:"لمپ",answer:"lamp"},
+  {q:"کدام کلمه معنی «کلید» است؟",opts:["key","lock","door"],fa:"کلید",pr:"کی",answer:"key"},
+  {q:"کدام کلمه معنی «قفل» است؟",opts:["lock","key","door"],fa:"قفل",pr:"لاک",answer:"lock"},
+  {q:"کدام کلمه معنی «تمیز» است؟",opts:["clean","dirty","new"],fa:"تمیز",pr:"کلین",answer:"clean"},
+  {q:"کدام کلمه معنی «کثیف» است؟",opts:["dirty","clean","old"],fa:"کثیف",pr:"دیرتی",answer:"dirty"},
+  {q:"کدام کلمه معنی «اجاره» است؟",opts:["rent","buy","sell"],fa:"اجاره",pr:"رِنت",answer:"rent"},
+  {q:"کدام کلمه معنی «همسایه» است؟",opts:["neighbor","friend","relative"],fa:"همسایه",pr:"نِیبور",answer:"neighbor"},
+  {q:"کدام کلمه معنی «ساختمان» است؟",opts:["building","house","apartment"],fa:"ساختمان",pr:"بیلدینگ",answer:"building"}
+];
+
+// حدس‌زدن نوع ۲ (انتخاب کلمه فارسی از روی انگلیسی)
+const guessWord = [
+  {q:"معنی «home» چیست؟",opts:["خانه","مدرسه","بیمارستان"],fa:"خانه",pr:"هُوم",answer:"خانه"},
+  {q:"معنی «house» چیست؟",opts:["خانه (ویلا)","آپارتمان","اتاق"],fa:"خانه (ویلا)",pr:"هاوس",answer:"خانه (ویلا)"},
+  {q:"معنی «apartment» چیست؟",opts:["آپارتمان","خانه","مغازه"],fa:"آپارتمان",pr:"اَپارتمِنت",answer:"آپارتمان"},
+  {q:"معنی «room» چیست؟",opts:["اتاق","حمام","آشپزخانه"],fa:"اتاق",pr:"روم",answer:"اتاق"},
+  {q:"معنی «bedroom» چیست؟",opts:["اتاق خواب","اتاق نشیمن","حمام"],fa:"اتاق خواب",pr:"بِدروم",answer:"اتاق خواب"},
+  {q:"معنی «bathroom» چیست؟",opts:["حمام","آشپزخانه","اتاق"],fa:"حمام",pr:"بَثروم",answer:"حمام"},
+  {q:"معنی «kitchen» چیست؟",opts:["آشپزخانه","حمام","اتاق"],fa:"آشپزخانه",pr:"کیچِن",answer:"آشپزخانه"},
+  {q:"معنی «living room» چیست؟",opts:["اتاق نشیمن","اتاق خواب","حمام"],fa:"اتاق نشیمن",pr:"لیوینگ روم",answer:"اتاق نشیمن"},
+  {q:"معنی «door» چیست؟",opts:["در","پنجره","دیوار"],fa:"در",pr:"دور",answer:"در"},
+  {q:"معنی «window» چیست؟",opts:["پنجره","در","سقف"],fa:"پنجره",pr:"ویندو",answer:"پنجره"},
+  {q:"معنی «wall» چیست؟",opts:["دیوار","کف","سقف"],fa:"دیوار",pr:"وال",answer:"دیوار"},
+  {q:"معنی «floor» چیست؟",opts:["کف","دیوار","سقف"],fa:"کف",pr:"فلور",answer:"کف"},
+  {q:"معنی «ceiling» چیست؟",opts:["سقف","کف","دیوار"],fa:"سقف",pr:"سیلینگ",answer:"سقف"},
+  {q:"معنی «bed» چیست؟",opts:["تخت","میز","صندلی"],fa:"تخت",pr:"بِد",answer:"تخت"},
+  {q:"معنی «table» چیست؟",opts:["میز","صندلی","مبل"],fa:"میز",pr:"تِیبِل",answer:"میز"},
+  {q:"معنی «chair» چیست؟",opts:["صندلی","میز","مبل"],fa:"صندلی",pr:"چِر",answer:"صندلی"},
+  {q:"معنی «sofa» چیست؟",opts:["مبل","تخت","صندلی"],fa:"مبل",pr:"سوفا",answer:"مبل"},
+  {q:"معنی «light» چیست؟",opts:["نور","چراغ","لامپ"],fa:"نور",pr:"لایت",answer:"نور"},
+  {q:"معنی «lamp» چیست؟",opts:["چراغ","نور","لامپ"],fa:"چراغ",pr:"لمپ",answer:"چراغ"},
+  {q:"معنی «key» چیست؟",opts:["کلید","قفل","درب"],fa:"کلید",pr:"کی",answer:"کلید"},
+  {q:"معنی «lock» چیست؟",opts:["قفل","کلید","درب"],fa:"قفل",pr:"لاک",answer:"قفل"},
+  {q:"معنی «clean» چیست؟",opts:["تمیز","کثیف","نو"],fa:"تمیز",pr:"کلین",answer:"تمیز"},
+  {q:"معنی «dirty» چیست؟",opts:["کثیف","تمیز","قدیمی"],fa:"کثیف",pr:"دیرتی",answer:"کثیف"},
+  {q:"معنی «rent» چیست؟",opts:["اجاره","خرید","فروش"],fa:"اجاره",pr:"رِنت",answer:"اجاره"},
+  {q:"معنی «neighbor» چیست؟",opts:["همسایه","دوست","فامیل"],fa:"همسایه",pr:"نِیبور",answer:"همسایه"},
+  {q:"معنی «building» چیست؟",opts:["ساختمان","خانه","مدرسه"],fa:"ساختمان",pr:"بیلدینگ",answer:"ساختمان"}
+];
+
+/* ========== نرمال‌سازی داده‌ها برای نمایش یکسان ========== */
+function normalizeItems() {
+  const all = [];
+
+  diagnostic.forEach(d => {
+    all.push({
+      en: d.en,
+      fa: d.fa,
+      pr: d.pr,
+      opts: d.opts,
+      answer: d.answer
+    });
+  });
+
+  combine.forEach(c => {
+    all.push({
+      en: c.words.join(' '),
+      fa: c.fa,
+      pr: c.pr,
+      answer: c.answer
+    });
+  });
+
+  guessMeaning.forEach(g => {
+    all.push({
+      en: g.q,
+      fa: g.fa,
+      pr: g.pr,
+      opts: g.opts,
+      answer: g.answer
+    });
+  });
+
+  guessWord.forEach(g => {
+    all.push({
+      en: g.q,
+      fa: g.fa,
+      pr: g.pr,
+      opts: g.opts,
+      answer: g.answer
+    });
+  });
+
+  return all;
+}
+
+const allItems = normalizeItems();
+
+/* ========== نمایش ========== */
+const list = document.getElementById("list");
+
+function render(items) {
+  list.innerHTML = items.map(q => {
+    const optsHtml = q.opts ? 
+      `<div class="q-opts">گزینه‌ها: ${q.opts.join(' — ')}</div>` : 
+      '';
+
+    return `
+      <div class="question">
+        <div class="q-en">${q.en}</div>
+        <div class="q-fa">${q.fa}</div>
+        ${q.pr ? `<div class="q-pr">تلفظ: ${q.pr}</div>` : ''}
+        ${optsHtml}
+        <div class="answer">پاسخ: ${q.answer}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+render(allItems);
+
+/* ========== جستجو ========== */
+document.getElementById("search").addEventListener("input", e => {
+  const v = e.target.value.trim().toLowerCase();
+  const filtered = allItems.filter(q =>
+    q.en.toLowerCase().includes(v) ||
+    q.fa.includes(v) ||
+    (q.pr && q.pr.includes(v)) ||
+    (q.answer && q.answer.toLowerCase().includes(v))
+  );
+  render(filtered);
+});
+
+/* ========== تم روشن/تیره ========== */
+const toggle = document.getElementById("themeToggle");
+toggle.onclick = () => {
+  document.body.classList.toggle("light");
+  toggle.textContent = document.body.classList.contains("light") ? "☀️" : "🌙";
+};
+</script>
+
+</body>
+</html>
