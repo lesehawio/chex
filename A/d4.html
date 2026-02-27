@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جزوه لغات پایه – خانه و وسایل</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600&display=swap');
+
+:root {
+    --accent:#91C200;
+    --accent-soft:rgba(145,194,0,0.18);
+    --bg:#0d0f12;
+    --glass:rgba(255,255,255,0.06);
+    --text:#f1f5f9;
+    --sub:#9ca3af;
+    --border:rgba(255,255,255,0.12);
+}
+
+.light {
+    --bg:#f5f7fa;
+    --glass:rgba(255,255,255,0.55);
+    --text:#1e293b;
+    --sub:#475569;
+    --border:rgba(0,0,0,0.12);
+}
+
+body {
+    margin:0;
+    padding:0;
+    background:var(--bg);
+    font-family:"Vazirmatn",sans-serif;
+    color:var(--text);
+    display:flex;
+    justify-content:center;
+    padding:40px 12px;
+    transition:0.35s ease;
+}
+
+.sheet {
+    width:100%;
+    max-width:850px;
+    background:var(--glass);
+    padding:40px;
+    border-radius:32px;
+    border:1px solid var(--border);
+    backdrop-filter:blur(40px) saturate(180%);
+    box-shadow:0 30px 80px rgba(0,0,0,0.45), inset 0 0 40px rgba(255,255,255,0.05);
+    transition:0.35s ease;
+}
+
+.header {
+    display:flex;
+    justify-content:flex-end;
+    margin-bottom:24px;
+}
+
+.theme-toggle {
+    font-size:1.9rem;
+    cursor:pointer;
+    user-select:none;
+    padding:6px 12px;
+    border-radius:14px;
+    background:rgba(255,255,255,0.08);
+    transition:0.25s ease;
+}
+
+.theme-toggle:hover {
+    background:rgba(255,255,255,0.18);
+}
+
+.title {
+    font-size:2rem;
+    font-weight:700;
+    text-align:center;
+    margin-bottom:8px;
+    letter-spacing:-0.5px;
+}
+
+.subtitle {
+    text-align:center;
+    color:var(--sub);
+    margin-bottom:30px;
+    font-size:1rem;
+}
+
+.category {
+    margin-top:40px;
+    margin-bottom:20px;
+    font-size:1.4rem;
+    font-weight:700;
+    color:var(--accent);
+    border-bottom:1px solid var(--border);
+    padding-bottom:8px;
+}
+
+.word-card {
+    background:rgba(255,255,255,0.05);
+    border:1px solid var(--border);
+    padding:22px 26px;
+    border-radius:20px;
+    margin-bottom:16px;
+    transition:0.25s ease;
+    backdrop-filter:blur(20px);
+}
+
+.word-card:hover {
+    border-color:var(--accent);
+    background:rgba(145,194,0,0.08);
+    transform:translateY(-2px);
+}
+
+.word {
+    font-size:1.5rem;
+    font-weight:700;
+    margin-bottom:4px;
+}
+
+.fa {
+    color:var(--sub);
+    font-size:1.05rem;
+    margin-bottom:4px;
+}
+
+.pr {
+    font-size:1rem;
+    color:var(--accent);
+    margin-bottom:10px;
+}
+
+.type {
+    font-size:0.9rem;
+    color:var(--sub);
+    margin-bottom:10px;
+}
+
+.desc {
+    font-size:0.95rem;
+    line-height:1.7;
+    margin-bottom:12px;
+}
+
+.example {
+    margin-top:10px;
+    background:rgba(255,255,255,0.08);
+    padding:12px 14px;
+    border-radius:14px;
+    font-size:0.95rem;
+    line-height:1.7;
+}
+</style>
+</head>
+<body>
+
+<div class="sheet">
+    <div class="header">
+        <div id="themeToggle" class="theme-toggle">🌙</div>
+    </div>
+
+    <div class="title">جزوه لغات پایه – خانه و وسایل</div>
+    <div class="subtitle">۲۶ لغت ضروری درباره خانه، اتاق‌ها، مبلمان و …</div>
+
+    <div id="content"></div>
+</div>
+
+<script>
+const words = [
+  {w:"home", fa:"خانه", pr:"هُوم", type:"اسم", desc:"محل زندگی، جایی که در آن زندگی می‌کنی."},
+  {w:"house", fa:"خانه (ویلا)", pr:"هاوس", type:"اسم", desc:"ساختمانی که برای سکونت استفاده می‌شود."},
+  {w:"apartment", fa:"آپارتمان", pr:"اَپارتمِنت", type:"اسم", desc:"واحد مسکونی در یک ساختمان بزرگتر."},
+  {w:"room", fa:"اتاق", pr:"روم", type:"اسم", desc:"اتاق، فضای محصور در ساختمان."},
+  {w:"bedroom", fa:"اتاق خواب", pr:"بِدروم", type:"اسم", desc:"اتاق خواب."},
+  {w:"bathroom", fa:"حمام", pr:"بَثروم", type:"اسم", desc:"حمام."},
+  {w:"kitchen", fa:"آشپزخانه", pr:"کیچِن", type:"اسم", desc:"آشپزخانه."},
+  {w:"living room", fa:"اتاق نشیمن", pr:"لیوینگ روم", type:"اسم", desc:"اتاق نشیمن."},
+  {w:"door", fa:"در", pr:"دور", type:"اسم", desc:"در ورودی."},
+  {w:"window", fa:"پنجره", pr:"ویندو", type:"اسم", desc:"پنجره."},
+  {w:"wall", fa:"دیوار", pr:"وال", type:"اسم", desc:"دیوار."},
+  {w:"floor", fa:"کف", pr:"فلور", type:"اسم", desc:"کف اتاق."},
+  {w:"ceiling", fa:"سقف", pr:"سیلینگ", type:"اسم", desc:"سقف."},
+  {w:"bed", fa:"تخت", pr:"بِد", type:"اسم", desc:"تخت خواب."},
+  {w:"table", fa:"میز", pr:"تِیبِل", type:"اسم", desc:"میز."},
+  {w:"chair", fa:"صندلی", pr:"چِر", type:"اسم", desc:"صندلی."},
+  {w:"sofa", fa:"مبل", pr:"سوفا", type:"اسم", desc:"مبل."},
+  {w:"light", fa:"نور", pr:"لایت", type:"اسم", desc:"نور."},
+  {w:"lamp", fa:"چراغ", pr:"لمپ", type:"اسم", desc:"چراغ."},
+  {w:"key", fa:"کلید", pr:"کی", type:"اسم", desc:"کلید."},
+  {w:"lock", fa:"قفل", pr:"لاک", type:"اسم", desc:"قفل."},
+  {w:"clean", fa:"تمیز", pr:"کلین", type:"صفت", desc:"تمیز، پاک."},
+  {w:"dirty", fa:"کثیف", pr:"دیرتی", type:"صفت", desc:"کثیف."},
+  {w:"rent", fa:"اجاره", pr:"رِنت", type:"اسم", desc:"اجاره (پولی که برای استفاده از ملک پرداخت می‌شود)."},
+  {w:"neighbor", fa:"همسایه", pr:"نِیبور", type:"اسم", desc:"همسایه."},
+  {w:"building", fa:"ساختمان", pr:"بیلدینگ", type:"اسم", desc:"ساختمان."}
+];
+
+function example(w) {
+  const ex = {
+    home: "I am at home. — من در خانه هستم.",
+    house: "They bought a new house. — آنها یک خانه جدید خریدند.",
+    apartment: "She lives in an apartment. — او در یک آپارتمان زندگی می‌کند.",
+    room: "This room is big. — این اتاق بزرگ است.",
+    bedroom: "My bedroom is blue. — اتاق خواب من آبی است.",
+    bathroom: "Where is the bathroom? — حمام کجاست؟",
+    kitchen: "The kitchen is clean. — آشپزخانه تمیز است.",
+    "living room": "We watch TV in the living room. — ما در اتاق نشیمن تلویزیون می‌بینیم.",
+    door: "Please close the door. — لطفاً در را ببند.",
+    window: "Open the window. — پنجره را باز کن.",
+    wall: "The wall is white. — دیوار سفید است.",
+    floor: "The floor is made of wood. — کف از چوب ساخته شده است.",
+    ceiling: "The ceiling is high. — سقف بلند است.",
+    bed: "The bed is comfortable. — تخت راحت است.",
+    table: "Put the book on the table. — کتاب را روی میز بگذار.",
+    chair: "Sit on the chair. — روی صندلی بنشین.",
+    sofa: "The sofa is soft. — مبل نرم است.",
+    light: "The light is bright. — نور روشن است.",
+    lamp: "Turn on the lamp. — چراغ را روشن کن.",
+    key: "I lost my key. — کلیدم را گم کردم.",
+    lock: "The lock is broken. — قفل شکسته است.",
+    clean: "The room is clean. — اتاق تمیز است.",
+    dirty: "The floor is dirty. — کف زمین کثیف است.",
+    rent: "The rent is high. — اجاره بالا است.",
+    neighbor: "My neighbor is friendly. — همسایه‌ام خوش‌برخورد است.",
+    building: "That building is tall. — آن ساختمان بلند است."
+  };
+  return ex[w] || "Example not found.";
+}
+
+const categories = {
+  "مفاهیم کلی خانه": words.slice(0, 4), // home, house, apartment, building (but building is last, adjust)
+  // Actually we need to reorder: home, house, apartment, building are indices 0,1,2,25.
+  // Let's manually create category arrays for clarity.
+};
+
+// Better to build categories manually to ensure correct grouping:
+const categoriesManual = {
+  "مفاهیم کلی خانه": [words[0], words[1], words[2], words[25]], // home, house, apartment, building
+  "اتاق‌ها": [words[3], words[4], words[5], words[6], words[7]], // room, bedroom, bathroom, kitchen, living room
+  "اجزای ساختمان": [words[8], words[9], words[10], words[11], words[12]], // door, window, wall, floor, ceiling
+  "مبلمان و وسایل": [words[13], words[14], words[15], words[16], words[17], words[18]], // bed, table, chair, sofa, light, lamp
+  "امنیت و کلید": [words[19], words[20]], // key, lock
+  "ویژگی‌ها و مفاهیم": [words[21], words[22], words[23], words[24]] // clean, dirty, rent, neighbor
+};
+
+const content = document.getElementById("content");
+content.innerHTML = Object.keys(categoriesManual).map(cat => `
+  <div class="category">${cat}</div>
+  ${categoriesManual[cat].map(x => `
+    <div class="word-card">
+      <div class="word">${x.w}</div>
+      <div class="fa">${x.fa}</div>
+      <div class="pr">تلفظ: ${x.pr}</div>
+      <div class="type">نقش دستوری: ${x.type}</div>
+      <div class="desc">${x.desc}</div>
+      <div class="example">${example(x.w)}</div>
+    </div>
+  `).join("")}
+`).join("");
+
+document.getElementById("themeToggle").onclick = ()=>{
+  document.body.classList.toggle("light");
+  const toggle = document.getElementById("themeToggle");
+  toggle.textContent = document.body.classList.contains("light") ? "☀️" : "🌙";
+};
+</script>
+</body>
+</html>
