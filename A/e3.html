@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>برگه سوالات – VisionOS Style</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600&display=swap');
+
+:root {
+    --accent:#91C200;
+    --accent-glow:rgba(145,194,0,0.35);
+    --bg:#0c0d10;
+    --glass:rgba(255,255,255,0.06);
+    --text:#f1f5f9;
+    --sub:#9ca3af;
+    --border:rgba(255,255,255,0.12);
+}
+
+.light {
+    --bg:#f5f7fa;
+    --glass:rgba(255,255,255,0.55);
+    --text:#1e293b;
+    --sub:#475569;
+    --border:rgba(0,0,0,0.12);
+}
+
+body {
+    margin:0;
+    padding:0;
+    background:var(--bg);
+    font-family:"Vazirmatn",sans-serif;
+    color:var(--text);
+    display:flex;
+    justify-content:center;
+    padding:40px 12px;
+    transition:0.35s ease;
+    backdrop-filter:blur(40px);
+}
+
+.sheet {
+    width:100%;
+    max-width:780px;
+    background:var(--glass);
+    padding:40px;
+    border-radius:32px;
+    border:1px solid var(--border);
+    backdrop-filter:blur(40px) saturate(180%);
+    box-shadow:0 30px 80px rgba(0,0,0,0.45), inset 0 0 40px rgba(255,255,255,0.05);
+    transition:0.35s ease;
+}
+
+.header {
+    display:flex;
+    justify-content:flex-end;
+    margin-bottom:24px;
+}
+
+.theme-toggle {
+    font-size:1.9rem;
+    cursor:pointer;
+    user-select:none;
+    padding:6px 12px;
+    border-radius:14px;
+    background:rgba(255,255,255,0.08);
+    transition:0.25s ease;
+}
+
+.theme-toggle:hover {
+    background:rgba(255,255,255,0.18);
+}
+
+.title {
+    font-size:2rem;
+    font-weight:700;
+    text-align:center;
+    margin-bottom:8px;
+    letter-spacing:-0.5px;
+}
+
+.subtitle {
+    text-align:center;
+    color:var(--sub);
+    margin-bottom:30px;
+    font-size:1rem;
+}
+
+.search-box {
+    width:100%;
+    padding:16px 20px;
+    border-radius:18px;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,0.08);
+    color:var(--text);
+    margin-bottom:26px;
+    font-size:1rem;
+    transition:0.25s ease;
+}
+
+.search-box:focus {
+    border-color:var(--accent);
+    box-shadow:0 0 0 4px var(--accent-glow);
+}
+
+.list {
+    max-height:65vh;
+    overflow-y:auto;
+    padding-right:6px;
+    scroll-behavior:smooth;
+}
+
+.list::-webkit-scrollbar {
+    width:8px;
+}
+.list::-webkit-scrollbar-thumb {
+    background:var(--accent);
+    border-radius:10px;
+}
+.list::-webkit-scrollbar-track {
+    background:rgba(255,255,255,0.05);
+}
+
+.question {
+    background:rgba(255,255,255,0.05);
+    border:1px solid var(--border);
+    padding:22px 24px;
+    border-radius:20px;
+    margin-bottom:18px;
+    transition:0.25s ease;
+    backdrop-filter:blur(20px);
+}
+
+.question:hover {
+    border-color:var(--accent);
+    background:rgba(145,194,0,0.08);
+    transform:translateY(-2px);
+}
+
+.q-en {
+    font-size:1.2rem;
+    font-weight:600;
+    margin-bottom:8px;
+}
+
+.q-fa {
+    color:var(--sub);
+    margin-bottom:6px;
+    font-size:0.95rem;
+}
+
+.q-pr {
+    color:var(--accent);
+    font-size:0.9rem;
+    margin-bottom:8px;
+    font-style:italic;
+}
+
+.q-opts {
+    background:rgba(255,255,255,0.1);
+    padding:8px 12px;
+    border-radius:10px;
+    margin-bottom:12px;
+    font-size:0.9rem;
+}
+
+.answer {
+    display:inline-block;
+    background:var(--accent);
+    color:#0f172a;
+    padding:8px 14px;
+    border-radius:10px;
+    font-weight:600;
+    font-size:0.9rem;
+    box-shadow:0 10px 25px var(--accent-glow);
+}
+</style>
+</head>
+
+<body>
+
+<div class="sheet">
+
+    <div class="header">
+        <div id="themeToggle" class="theme-toggle">🌙</div>
+    </div>
+
+    <div class="title"> سوالات روز سوم </div>
+    <div class="subtitle">سوالات همراه با پاسخ صحیح – طراحی فوق‌مدرن</div>
+
+    <input id="search" class="search-box" placeholder="جستجو در سوالات...">
+
+    <div id="list" class="list"></div>
+
+</div>
+
+<script>
+/* ========== داده‌های جدید ========== */
+
+// تشخیصی
+const diagnostic = [
+  {en:"I am very busy ___.",fa:"من امروز خیلی سرم هستم.",pr:"آی اَم وَری بیزی تُدِی",opts:["today","tomorrow","yesterday"],answer:"today"},
+  {en:"See you ___.",fa:"فردا می‌بینمت.",pr:"سی یو تُمورو",opts:["tomorrow","today","now"],answer:"tomorrow"},
+  {en:"I woke up ___.",fa:"من امروز صبح زود بیدار شدم.",pr:"آی ووک آپ اِرلی دیس مورنینگ",opts:["early","late","now"],answer:"early"},
+  {en:"We can go there ___.",fa:"ما می‌توانیم بعداً به آنجا برویم.",pr:"وی کَن گو دِر لِیتِر",opts:["later","soon","now"],answer:"later"},
+  {en:"I will finish my work ___.",fa:"کارم را به زودی تمام می‌کنم.",pr:"آی ویل فینیش مای وُرک سُون",opts:["soon","later","never"],answer:"soon"},
+  {en:"I ___ drink coffee.",fa:"من معمولاً قهوه می‌نوشم.",pr:"آی یووْژوالی دْرینک کافی",opts:["usually","always","sometimes"],answer:"usually"},
+  {en:"Please call me ___ the meeting.",fa:"لطفاً بعد از جلسه با من تماس بگیر.",pr:"پلیز کال می اَفتِر دی میتینگ",opts:["after","before","now"],answer:"after"}
+];
+
+// جمله‌سازی
+const combine = [
+  {words:["yesterday","was","busy","I"],fa:"من دیروز شلوغ بودم.",pr:"آی واز بیزی یِستِردِی",answer:"i was busy yesterday"},
+  {words:["morning","every","run","I"],fa:"من هر صبح می‌دوم.",pr:"آی ران اِوری مورنینگ",answer:"i run every morning"},
+  {words:["night","study","at","I"],fa:"من شب درس می‌خوانم.",pr:"آی اِستادی اَت نایت",answer:"i study at night"},
+  {words:["never","smoke","I"],fa:"من هرگز سیگار نمی‌کشم.",pr:"آی نِوِر اِسمُوک",answer:"i never smoke"},
+  {words:["start","work","I","soon"],fa:"من به زودی کار را شروع می‌کنم.",pr:"آی اِستارت وُرک سُون",answer:"i start work soon"},
+  {words:["finish","book","I","night","at"],fa:"من کتاب را شب تمام می‌کنم.",pr:"آی فینیش دِ بوک اَت نایت",answer:"i finish the book at night"}
+];
+
+// حدس‌زدن نوع ۱
+const guessMeaning = [
+  {q:"کدام کلمه معنی «حالا» است؟",opts:["now","late","soon"],fa:"حالا",pr:"ناو",answer:"now"},
+  {q:"کدام کلمه معنی «دیر» است؟",opts:["late","early","soon"],fa:"دیر",pr:"لِیت",answer:"late"},
+  {q:"کدام کلمه معنی «بعد از ظهر» است؟",opts:["afternoon","morning","evening"],fa:"بعد از ظهر",pr:"اَفتِرنون",answer:"afternoon"},
+  {q:"کدام کلمه معنی «عصر» است؟",opts:["evening","night","morning"],fa:"عصر",pr:"ایوْنینگ",answer:"evening"},
+  {q:"کدام کلمه معنی «همیشه» است؟",opts:["always","sometimes","never"],fa:"همیشه",pr:"اُلویز",answer:"always"},
+  {q:"کدام کلمه معنی «گاهی» است؟",opts:["sometimes","always","never"],fa:"گاهی",pr:"سامتایمز",answer:"sometimes"}
+];
+
+// حدس‌زدن نوع ۲
+const guessWord = [
+  {q:"معنی «week» چیست؟",opts:["هفته","ماه","سال"],fa:"هفته",pr:"ویک",answer:"هفته"},
+  {q:"معنی «month» چیست؟",opts:["ماه","هفته","سال"],fa:"ماه",pr:"مَانث",answer:"ماه"},
+  {q:"معنی «year» چیست؟",opts:["سال","ماه","هفته"],fa:"سال",pr:"ییر",answer:"سال"},
+  {q:"معنی «hour» چیست؟",opts:["ساعت","دقیقه","روز"],fa:"ساعت",pr:"آوِر",answer:"ساعت"},
+  {q:"معنی «minute» چیست؟",opts:["دقیقه","ساعت","ثانیه"],fa:"دقیقه",pr:"مینیت",answer:"دقیقه"},
+  {q:"معنی «before» چیست؟",opts:["قبل","بعد","حین"],fa:"قبل",pr:"بیفور",answer:"قبل"}
+];
+
+/* ========== نرمال‌سازی داده‌ها برای نمایش یکسان ========== */
+function normalizeItems() {
+  const all = [];
+
+  // تشخیصی
+  diagnostic.forEach(d => {
+    all.push({
+      en: d.en,
+      fa: d.fa,
+      pr: d.pr,
+      opts: d.opts,
+      answer: d.answer
+    });
+  });
+
+  // جمله‌سازی (ساخت en از words)
+  combine.forEach(c => {
+    all.push({
+      en: c.words.join(' '),
+      fa: c.fa,
+      pr: c.pr,
+      answer: c.answer
+    });
+  });
+
+  // guessMeaning (استفاده از q به عنوان en)
+  guessMeaning.forEach(g => {
+    all.push({
+      en: g.q,
+      fa: g.fa,
+      pr: g.pr,
+      opts: g.opts,
+      answer: g.answer
+    });
+  });
+
+  // guessWord (استفاده از q به عنوان en)
+  guessWord.forEach(g => {
+    all.push({
+      en: g.q,
+      fa: g.fa,
+      pr: g.pr,
+      opts: g.opts,
+      answer: g.answer
+    });
+  });
+
+  return all;
+}
+
+const allItems = normalizeItems();
+
+/* ========== نمایش ========== */
+const list = document.getElementById("list");
+
+function render(items) {
+  list.innerHTML = items.map(q => {
+    // نمایش گزینه‌ها (اگر وجود داشته باشد)
+    const optsHtml = q.opts ? 
+      `<div class="q-opts">گزینه‌ها: ${q.opts.join(' — ')}</div>` : 
+      '';
+
+    return `
+      <div class="question">
+        <div class="q-en">${q.en}</div>
+        <div class="q-fa">${q.fa}</div>
+        ${q.pr ? `<div class="q-pr">تلفظ: ${q.pr}</div>` : ''}
+        ${optsHtml}
+        <div class="answer">پاسخ: ${q.answer}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+render(allItems);
+
+/* ========== جستجو ========== */
+document.getElementById("search").addEventListener("input", e => {
+  const v = e.target.value.trim().toLowerCase();
+  const filtered = allItems.filter(q =>
+    q.en.toLowerCase().includes(v) ||
+    q.fa.includes(v) ||  // فارسی را بدون toLowerCase
+    (q.pr && q.pr.includes(v)) ||
+    (q.answer && q.answer.toLowerCase().includes(v))
+  );
+  render(filtered);
+});
+
+/* ========== تم روشن/تیره ========== */
+const toggle = document.getElementById("themeToggle");
+toggle.onclick = () => {
+  document.body.classList.toggle("light");
+  toggle.textContent = document.body.classList.contains("light") ? "☀️" : "🌙";
+};
+</script>
+
+</body>
+</html>
