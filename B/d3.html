@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Apple VisionOS Flashcard – Collocations</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600&display=swap');
+
+/* رنگ‌ها و تم پایه */
+:root {
+  --accent:#91C200;
+  --bg-dark:#05060a;
+  --bg-light:#f3f4f6;
+  --text-dark:#f9fafb;
+  --text-light:#111827;
+  --sub-dark:#9ca3af;
+  --sub-light:#6b7280;
+  --glass-dark:rgba(255,255,255,0.06);
+  --glass-light:rgba(255,255,255,0.85);
+  --border:#91C200;
+}
+
+/* حالت‌ها */
+body {
+  margin:0;
+  padding:0;
+  font-family:"Vazirmatn",sans-serif;
+  background:var(--bg-dark);
+  color:var(--text-dark);
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:background 0.35s ease,color 0.35s ease;
+}
+
+/* تم روشن/تیره */
+body.light {
+  background:var(--bg-light);
+  color:var(--text-light);
+}
+
+/* هدر ثابت */
+.header {
+  position:fixed;
+  top:18px;
+  right:18px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  z-index:10;
+}
+
+.theme-toggle {
+  font-size:1.6rem;
+  cursor:pointer;
+  padding:6px 12px;
+  border-radius:14px;
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(20px);
+  transition:0.25s ease;
+}
+.theme-toggle:hover {
+  background:rgba(255,255,255,0.18);
+}
+
+.counter {
+  font-size:0.9rem;
+  color:var(--sub-dark);
+}
+body.light .counter {
+  color:var(--sub-light);
+}
+
+/* کانتینر مرکزی */
+.wrapper {
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.card-shell {
+  width:420px;
+  max-width:90vw;
+  height:340px;
+}
+
+/* کارت شیشه‌ای */
+.card {
+  width:100%;
+  height:100%;
+  background:var(--glass-dark);
+  border-radius:26px;
+  border:2px solid var(--border);
+  backdrop-filter:blur(40px) saturate(180%);
+  box-shadow:0 30px 80px rgba(0,0,0,0.55);
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:22px 24px;
+  box-sizing:border-box;
+  text-align:right;
+  transition:transform 0.25s ease, background 0.35s ease;
+  cursor:grab;
+}
+body.light .card {
+  background:var(--glass-light);
+}
+.card.dragging {
+  cursor:grabbing;
+  transition:none;
+}
+
+/* بالای کارت */
+.card-header {
+  font-size:0.85rem;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  color:var(--sub-dark);
+}
+body.light .card-header {
+  color:var(--sub-light);
+}
+
+/* محتوا */
+.chunk {
+  font-size:1.5rem;
+  font-weight:700;
+  margin-top:8px;
+  margin-bottom:4px;
+}
+
+.meaning {
+  font-size:1.05rem;
+  color:var(--accent);
+  margin-bottom:10px;
+}
+
+.desc {
+  font-size:0.95rem;
+  color:var(--sub-dark);
+  margin-bottom:10px;
+  line-height:1.7;
+}
+body.light .desc {
+  color:var(--sub-light);
+}
+
+.usage {
+  margin-top:6px;
+  background:rgba(255,255,255,0.08);
+  border-radius:14px;
+  padding:10px 12px;
+  font-size:0.9rem;
+  line-height:1.7;
+}
+body.light .usage {
+  background:rgba(255,255,255,0.9);
+}
+
+/* نوار پیشرفت */
+.progress-bar {
+  width:100%;
+  height:6px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.08);
+  overflow:hidden;
+  margin-top:10px;
+}
+.progress-fill {
+  height:100%;
+  width:0%;
+  background:var(--accent);
+  transition:width 0.25s ease;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span id="counter" class="counter"></span>
+  <div id="themeToggle" class="theme-toggle">🌙</div>
+</div>
+
+<div class="wrapper">
+  <div class="card-shell">
+    <div id="card" class="card">
+      <div>
+        <div class="card-header">
+          <span>Chunk Flashcard</span>
+          <span id="indexLabel"></span>
+        </div>
+        <div class="chunk" id="chunk"></div>
+        <div class="meaning" id="meaning"></div>
+        <div class="desc" id="desc"></div>
+        <div class="usage" id="usage"></div>
+      </div>
+      <div class="progress-bar">
+        <div id="progress" class="progress-fill"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== داده‌های کالوکیشن ==========
+const collocations = [
+  {
+    noun: {w: "course", fa: "دوره", pr: "کورس"},
+    verb: {w: "take", fa: "گذراندن", pr: "تِیک"},
+    chunk: "take a course",
+    chunkFa: "گذراندن دوره"
+  },
+  {
+    noun: {w: "class", fa: "کلاس", pr: "کلس"},
+    verb: {w: "participate in", fa: "شرکت کردن در", pr: "پارتیسیپیت این"},
+    chunk: "participate in class",
+    chunkFa: "شرکت در کلاس"
+  },
+  {
+    noun: {w: "exam", fa: "امتحان", pr: "اگزَم"},
+    verb: {w: "study for", fa: "مطالعه برای", pr: "استادی فور"},
+    chunk: "study for an exam",
+    chunkFa: "مطالعه برای امتحان"
+  },
+  {
+    noun: {w: "questions", fa: "سوالات", pr: "کوئسچنز"},
+    verb: {w: "answer", fa: "پاسخ دادن", pr: "انسر"},
+    chunk: "answer questions",
+    chunkFa: "پاسخ دادن به سوالات"
+  },
+  {
+    noun: {w: "results", fa: "نتایج", pr: "ریزالتس"},
+    verb: {w: "discuss", fa: "بحث کردن", pr: "دیسکاس"},
+    chunk: "discuss results",
+    chunkFa: "بحث درباره نتایج"
+  },
+  {
+    noun: {w: "experiment", fa: "آزمایش", pr: "اکسپریمنت"},
+    verb: {w: "run", fa: "انجام دادن", pr: "ران"},
+    chunk: "run an experiment",
+    chunkFa: "انجام آزمایش"
+  },
+  {
+    noun: {w: "summary", fa: "خلاصه", pr: "سامری"},
+    verb: {w: "write", fa: "نوشتن", pr: "رایت"},
+    chunk: "write a summary",
+    chunkFa: "نوشتن خلاصه"
+  },
+  {
+    noun: {w: "report", fa: "گزارش", pr: "ریپورت"},
+    verb: {w: "write", fa: "نوشتن", pr: "رایت"},
+    chunk: "write a report",
+    chunkFa: "نوشتن گزارش"
+  },
+  {
+    noun: {w: "advice", fa: "مشاوره", pr: "ادوایس"},
+    verb: {w: "ask for", fa: "درخواست کردن", pr: "اسک فور"},
+    chunk: "ask for advice",
+    chunkFa: "درخواست مشاوره"
+  },
+  {
+    noun: {w: "research", fa: "تحقیق", pr: "ریسرچ"},
+    verb: {w: "take part in", fa: "شرکت کردن در", pr: "تیک پارت این"},
+    chunk: "take part in research",
+    chunkFa: "شرکت در تحقیق"
+  },
+  {
+    noun: {w: "project", fa: "پروژه", pr: "پراجکت"},
+    verb: {w: "plan", fa: "برنامه‌ریزی کردن", pr: "پلن"},
+    chunk: "plan a project",
+    chunkFa: "برنامه‌ریزی پروژه"
+  },
+  {
+    noun: {w: "training", fa: "آموزش", pr: "ترینینگ"},
+    verb: {w: "attend", fa: "شرکت کردن", pr: "اتند"},
+    chunk: "attend training",
+    chunkFa: "شرکت در آموزش"
+  },
+  {
+    noun: {w: "slides", fa: "اسلایدها", pr: "اسلایدز"},
+    verb: {w: "prepare", fa: "آماده کردن", pr: "پرپِر"},
+    chunk: "prepare slides",
+    chunkFa: "آماده کردن اسلاید"
+  },
+  {
+    noun: {w: "feedback", fa: "بازخورد", pr: "فیدبک"},
+    verb: {w: "review", fa: "بررسی کردن", pr: "ریویو"},
+    chunk: "review feedback",
+    chunkFa: "مرور بازخورد"
+  },
+  {
+    noun: {w: "deadlines", fa: "ددلاین‌ها", pr: "ددلاینز"},
+    verb: {w: "meet", fa: "رعایت کردن", pr: "میت"},
+    chunk: "meet deadlines",
+    chunkFa: "رعایت ددلاین"
+  },
+  {
+    noun: {w: "assignments", fa: "تکالیف", pr: "اساینمنتس"},
+    verb: {w: "talk about", fa: "صحبت کردن درباره", pr: "تاک اباوت"},
+    chunk: "talk about assignments",
+    chunkFa: "صحبت درباره تکالیف"
+  },
+  {
+    noun: {w: "initiative", fa: "ابتکار عمل", pr: "اینیشیتیو"},
+    verb: {w: "take", fa: "نشان دادن", pr: "تیک"},
+    chunk: "take initiative",
+    chunkFa: "ابتکار عمل نشان دادن"
+  }
+];
+
+// ========== تبدیل به فرمت فلشکارت ==========
+const chunks = collocations.map(item => {
+  // ساخت توضیح (desc)
+  const verbText = item.verb.w;
+  const nounText = item.noun.w;
+  const desc = `ترکیب «${verbText} + ${nounText}» یعنی ${item.chunkFa}.`;
+
+  // ساخت مثال (usage)
+  // برای سادگی، یک مثال عمومی می‌سازیم. می‌توانید بعداً دقیق‌تر کنید.
+  let exampleEn = "";
+  let exampleFa = "";
+  if (item.chunk.includes("a") || item.chunk.includes("an")) {
+    exampleEn = `I need to ${item.chunk}.`;
+  } else {
+    exampleEn = `We should ${item.chunk}.`;
+  }
+  // ترجمه تقریبی
+  if (item.chunkFa.includes("کردن") || item.chunkFa.includes("دادن")) {
+    exampleFa = `من باید ${item.chunkFa} کنم.`;
+  } else {
+    exampleFa = `ما باید ${item.chunkFa}.`;
+  }
+
+  return {
+    en: item.chunk,
+    fa: item.chunkFa,
+    desc: desc,
+    usage: `${exampleEn}\n${exampleFa}`
+  };
+});
+
+// ========== متغیرهای اصلی ==========
+let index = 0;
+
+const cardEl    = document.getElementById("card");
+const chunkEl   = document.getElementById("chunk");
+const meaningEl = document.getElementById("meaning");
+const descEl    = document.getElementById("desc");
+const usageEl   = document.getElementById("usage");
+const counterEl = document.getElementById("counter");
+const indexLabel= document.getElementById("indexLabel");
+const progressEl= document.getElementById("progress");
+const themeToggle = document.getElementById("themeToggle");
+
+function renderCard(){
+  const item = chunks[index];
+  chunkEl.textContent   = item.en;
+  meaningEl.textContent = item.fa;
+  descEl.textContent    = item.desc;
+  usageEl.innerHTML     = item.usage.replace(/\n/g,"<br>");
+  counterEl.textContent = `${index+1} / ${chunks.length}`;
+  indexLabel.textContent= `Card ${index+1}`;
+  progressEl.style.width = ((index+1)/chunks.length)*100 + "%";
+  cardEl.style.transform = "translateX(0)";
+}
+renderCard();
+
+// ========== درگ برای کارت بعدی/قبلی ==========
+let startX = 0;
+let dragging = false;
+
+function startDrag(e){
+  dragging = true;
+  cardEl.classList.add("dragging");
+  startX = e.touches ? e.touches[0].clientX : e.clientX;
+}
+
+function onDrag(e){
+  if(!dragging) return;
+  const x = e.touches ? e.touches[0].clientX : e.clientX;
+  const delta = x - startX;
+  cardEl.style.transform = `translateX(${delta}px)`;
+}
+
+function endDrag(e){
+  if(!dragging) return;
+  dragging = false;
+  cardEl.classList.remove("dragging");
+  const x = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+  const delta = x - startX;
+  const threshold = 80;
+
+  if(delta > threshold && index > 0){
+    index--;
+  }else if(delta < -threshold && index < chunks.length-1){
+    index++;
+  }
+  renderCard();
+}
+
+cardEl.addEventListener("mousedown", startDrag);
+window.addEventListener("mousemove", onDrag);
+window.addEventListener("mouseup", endDrag);
+
+cardEl.addEventListener("touchstart", startDrag, {passive:true});
+window.addEventListener("touchmove", onDrag, {passive:true});
+window.addEventListener("touchend", endDrag);
+
+// ========== تم روشن/تیره ==========
+themeToggle.onclick = () => {
+  document.body.classList.toggle("light");
+  themeToggle.textContent =
+    document.body.classList.contains("light") ? "☀️" : "🌙";
+};
+</script>
+
+</body>
+</html>
